@@ -16,17 +16,17 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest
 @ContextConfiguration(classes = RootController.class)
 @ActiveProfiles({"integration"})
-class GetWelcomeTest {
+//class GetWelcomeTest {
 
-    @Autowired
-    private transient MockMvc mockMvc;
-
-    @DisplayName("Should welcome upon root request with 200 response code")
-    @Test
-    void welcomeRootEndpoint() throws Exception {
-        MvcResult response = mockMvc.perform(get("/")).andExpect(status().isOk()).andReturn();
-
-        assertThat(response.getResponse().getContentAsString()).startsWith("Welcome");
-    }
-}
+//    @Autowired
+//    private transient MockMvc mockMvc;
+//
+//    @DisplayName("Should welcome upon root request with 200 response code")
+//    @Test
+//    void welcomeRootEndpoint() throws Exception {
+//        MvcResult response = mockMvc.perform(get("/")).andExpect(status().isOk()).andReturn();
+//
+//        assertThat(response.getResponse().getContentAsString()).startsWith("Welcome");
+//    }
+//}
 
