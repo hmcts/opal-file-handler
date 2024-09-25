@@ -36,6 +36,7 @@ by executing the following command:
 
 This will start the API container exposing the application's port
 (set to `4553` in this template app).
+The database is available on `jdbc:postgresql://localhost:5434/opal-file-db` with username and password `opal-file`.
 
 In order to test if the application is up, you can call its health endpoint:
 
