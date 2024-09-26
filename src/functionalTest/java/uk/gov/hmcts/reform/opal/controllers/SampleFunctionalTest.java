@@ -28,7 +28,7 @@ class SampleFunctionalTest {
         Response response = given()
             .contentType(ContentType.JSON)
             .when()
-            .get()
+            .get("/health")
             .then()
             .extract().response();
 

@@ -1,4 +1,19 @@
+
 services:
+  opal-file-db:
+    container_name: opal-file-db
+    image: postgres:16
+    restart: always
+    environment:
+      - POSTGRES_DB=opal-file-db
+      - POSTGRES_USER=opal-file
+      - POSTGRES_PASSWORD=opal-file
+      - PGPORT=5432
+    ports:
+      - "5434:5432"
+    volumes:
+      - opal_file_db_data:/var/lib/postgresql/data
+
   opal-file-handler:
     container_name: opal-file-handler
     build:
@@ -7,6 +22,7 @@ services:
         - http_proxy
         - https_proxy
         - no_proxy
+    image: hmctspublic.azurecr.io/opal/file-handler
     environment:
       # these environment variables are used by java-logging library
       - ROOT_APPENDER
@@ -23,20 +39,6 @@ services:
       - OPAL_FILE_DB_HOST=opal-file-db
     ports:
       - $SERVER_PORT:$SERVER_PORT
-  
-  opal-file-db:
-    container_name: opal-file-db
-    image: postgres:16
-    restart: always
-    environment:
-      - POSTGRES_DB=opal-file-db
-      - POSTGRES_USER=opal-file
-      - POSTGRES_PASSWORD=opal-file
-      - PGPORT=5432
-    ports:
-      - "5434:5432"
-    volumes:
-      - opal_file_db_data:/var/lib/postgresql/data
 
 volumes:
   opal_file_db_data:

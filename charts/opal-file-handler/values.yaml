@@ -17,7 +17,7 @@ java:
         - name: file-handler-POSTGRES-USER
           alias: OPAL_FILE_DB_USERNAME
         - name: file-handler-POSTGRES-DATABASE
-          alias: OPAL_FILE_DB_NAME 
- 
+          alias: OPAL_FILE_DB_NAME  
+
   environment:
     RUN_DB_MIGRATION_ON_STARTUP: true

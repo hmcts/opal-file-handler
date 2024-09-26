@@ -2,10 +2,14 @@ server:
   port: 4553
   shutdown: "graceful"
 
+# If you use a database then uncomment the `group:, readiness: and include: "db"` lines in the health probes and uncomment the datasource section
 management:
   endpoint:
     health:
       show-details: "always"
+      # group:
+      #  readiness:
+      #   include: "db"
   endpoints:
     web:
       base-path: /
@@ -23,7 +27,7 @@ spring:
     name: Opal File Handler
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://${OPAL_FILE_DB_HOST:localhost}:${OPAL_FILE_DB_PORT:5434}/${OPAL_FILE_DB_NAME:opal-file-db}${OPAL_FILE_DB_OPTIONS:}
+    url: jdbc:postgresql://${OPAL_FILE_DB_HOST:opal-file-db}:${OPAL_FILE_DB_PORT:5432}/${OPAL_FILE_DB_NAME:opal-file-db}${OPAL_USER_DB_OPTIONS:}
     username: ${OPAL_FILE_DB_USERNAME:opal-file}
     password: ${OPAL_FILE_DB_PASSWORD:opal-file}
     properties:
@@ -36,10 +40,8 @@ spring:
       maxLifetime: 7200000
       connectionTimeout: 30000
   jpa:
-    show-sql: false
     properties:
       hibernate:
-        format_sql: false
         dialect: org.hibernate.dialect.PostgreSQLDialect
         jdbc:
           lob:
@@ -48,14 +50,12 @@ spring:
   flyway:
     baseline-on-migrate: true
     enabled: true
- 
+
 dbMigration:
+  # When true, the app will run DB migration on startup.
+  # Otherwise, it will just check if all migrations have been applied (and fail to start if not).
   runOnStartup: ${RUN_DB_MIGRATION_ON_STARTUP:true}
 
 azure:
   application-insights:
     instrumentation-key: ${opal.AppInsightsInstrumentationKey:00000000-0000-0000-0000-000000000000}
-
-logging:
-  level:
-    root: DEBUG
