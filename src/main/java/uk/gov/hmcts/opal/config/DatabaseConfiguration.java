@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.opal.config;
+package uk.gov.hmcts.opal.config;
 
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
