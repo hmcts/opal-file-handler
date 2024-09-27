@@ -27,7 +27,7 @@ spring:
     name: Opal File Handler
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://${OPAL_FILE_DB_HOST:opal-file-db}:${OPAL_FILE_DB_PORT:5432}/${OPAL_FILE_DB_NAME:opal-file-db}${OPAL_USER_DB_OPTIONS:}
+    url: jdbc:postgresql://${OPAL_FILE_DB_HOST:localhost}:${OPAL_FILE_DB_PORT:5432}/${OPAL_FILE_DB_NAME:opal-file-db}${OPAL_USER_DB_OPTIONS:}
     username: ${OPAL_FILE_DB_USERNAME:opal-file}
     password: ${OPAL_FILE_DB_PASSWORD:opal-file}
     properties:
