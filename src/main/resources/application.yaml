@@ -24,29 +24,91 @@ spring:
   config:
     import: "optional:configtree:/mnt/secrets/opal/"
   application:
-    name: Spring Boot Template
-#  datasource:
-#    driver-class-name: org.postgresql.Driver
-#    url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}${DB_OPTIONS:}
-#    username: ${DB_USER_NAME}
-#    password: ${DB_PASSWORD}
-#    properties:
-#      charSet: UTF-8
-#    hikari:
-#      minimumIdle: 2
-#      maximumPoolSize: 10
-#      idleTimeout: 10000
-#      poolName: {to-be-defined}HikariCP
-#      maxLifetime: 7200000
-#      connectionTimeout: 30000
-#  jpa:
-#    properties:
-#      hibernate:
-#        jdbc:
-#          lob:
-#            # silence the 'wall-of-text' - unnecessary exception throw about blob types
-#            non_contextual_creation: true
+    name: Opal File Handler
+  jackson:
+    serialization:
+      write_dates_as_timestamps: false
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://${OPAL_FINES_DB_HOST:localhost}:${OPAL_FINES_DB_PORT:5432}/${OPAL_FINES_DB_NAME:opal-fines-db}${OPAL_FINES_DB_OPTIONS:}
+    username: ${OPAL_FINES_DB_USERNAME:opal-fines}
+    password: ${OPAL_FINES_DB_PASSWORD:opal-fines}
+    properties:
+      charSet: UTF-8
+    hikari:
+      minimumIdle: 2
+      maximumPoolSize: 10
+      idleTimeout: 10000
+      poolName: OpalHikariCP
+      maxLifetime: 7200000
+      connectionTimeout: 30000
+  jpa:
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: false
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        jdbc:
+          lob:
+            # silence the 'wall-of-text' - unnecessary exception throw about blob types
+            non_contextual_creation: true
+  flyway:
+    baseline-on-migrate: true
+
+dbMigration:
+  # When true, the app will run DB migration on startup.
+  # Otherwise, it will just check if all migrations have been applied (and fail to start if not).
+  runOnStartup: ${RUN_DB_MIGRATION_ON_STARTUP:true}
 
 azure:
   application-insights:
     instrumentation-key: ${opal.AppInsightsInstrumentationKey:00000000-0000-0000-0000-000000000000}
+
+quartzProperties:
+  org.quartz:
+    scheduler:
+      instanceId: AUTO
+    jobStore:
+      isClustered: true
+      class: org.springframework.scheduling.quartz.LocalDataSourceJobStore
+      driverDelegateClass: org.quartz.impl.jdbcjobstore.PostgreSQLDelegate
+      dataSource: dataSource
+      clusterCheckinInterval: 2000
+      misfireThreshold: 60000
+    threadPool:
+      class: org.quartz.simpl.SimpleThreadPool
+      threadCount: 8
+
+opal:
+  sftp:
+    inbound:
+      host: ${OPAL_SFTP_INBOUND_HOST:localhost}
+      port: ${OPAL_SFTP_INBOUND_PORT:2222}
+      user: ${OPAL_SFTP_INBOUND_USER:inbound}
+      password: ${OPAL_SFTP_INBOUND_PASSWORD:password}
+      location: ${OPAL_SFTP_INBOUND_LOCATION:inbound}
+      create-sub-locations: ${OPAL_SFTP_INBOUND_CREATE_SUB_LOCATIONS:true}
+    outbound:
+      host: ${OPAL_SFTP_OUTBOUND_HOST:localhost}
+      port: ${OPAL_SFTP_OUTBOUND_PORT:2222}
+      user: ${OPAL_SFTP_OUTBOUND_USER:outbound}
+      password: ${OPAL_SFTP_OUTBOUND_PASSWORD:password}
+      location: ${OPAL_SFTP_OUTBOUND_LOCATION:outbound}
+      create-sub-locations: ${OPAL_SFTP_OUTBOUND_CREATE_SUB_LOCATIONS:true}
+  schedule:
+    auto-check-job:
+      cron: ${OPAL_AUTO_CHECK_JOB_CRON:0 0 0 * * ?}
+      file-name: ${OPAL_AUTO_CHECK_JOB_FILE_NAME:test.txt}
+    auto-cash-job:
+      cron: ${OPAL_AUTO_CASH_JOB_CRON:0 0 0 * * ?}
+      file-name: ${OPAL_AUTO_CASH_JOB_FILE_NAME:test.txt}
+    dwp-bailiffs-job:
+      cron: ${OPAL_DWP_BAILIFFS_JOB_CRON:0 50 * * * ?}
+      file-name: ${OPAL_DWP_BAILIFFS_JOB_FILE_NAME:test.txt}
+    all-pay-archive-job:
+      cron: ${OPAL_ALL_PAY_ARCHIVE_JOB_CRON:0 0 0 * * ?}
+      file-name: ${OPAL_ALL_PAY_ARCHIVE_JOB_FILE_NAME:test.txt}
+    log-retention-job:
+      cron: ${OPAL_LOG_RETENTION_JOB_CRON:0 0 0 * * ?}
+    file-handler-job:
+      cron: ${OPAL_FILE_HANDLER_JOB_CRON:0 0 0 * * ?}
