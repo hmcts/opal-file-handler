@@ -86,6 +86,7 @@ task functional(type: Test) {
   description = "Runs functional tests"
   group = "Verification"
   testClassesDirs = sourceSets.functionalTest.output.classesDirs
+  reports.junitXml.getOutputLocation().set(layout.buildDirectory.dir("test-results/functional"))
   classpath = sourceSets.functionalTest.runtimeClasspath
 }
 
@@ -100,6 +101,7 @@ task integration(type: Test) {
 task smoke(type: Test) {
   description = "Runs Smoke Tests"
   testClassesDirs = sourceSets.smokeTest.output.classesDirs
+  reports.junitXml.getOutputLocation().set(layout.buildDirectory.dir("test-results/smoke"))
   classpath = sourceSets.smokeTest.runtimeClasspath
 }
 
