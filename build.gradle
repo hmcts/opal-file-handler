@@ -103,13 +103,35 @@ task smoke(type: Test) {
   classpath = sourceSets.smokeTest.runtimeClasspath
 }
 
+def coverageExclusions = [
+  '**/uk/gov/hmcts/opal/**/model/**',
+  '**/uk/gov/hmcts/opal/**/config/**',
+  '**/uk/gov/hmcts/opal/**/repository/**',
+  '**/uk/gov/hmcts/opal/**/exception/**'
+]
+
 jacocoTestReport {
   executionData(test, integration)
   reports {
     xml.required = true
-    csv.required = false
     html.required = true
+    csv.required = false
+    html.outputLocation.set(layout.buildDirectory.dir("jacocoHtml"))
   }
+  afterEvaluate {
+    classDirectories.setFrom(files(classDirectories.files.collect {
+      fileTree(dir: it, exclude: jacocoExclusionArray(coverageExclusions)
+      )
+    }))
+  }
+}
+
+static String[] jacocoExclusionArray(ArrayList<String> exclusions) {
+  final def lst = new ArrayList<String>()
+
+  exclusions.stream().forEach { it.endsWith(".java") ? lst.add(it.replace(".java", ".class")) : lst.add(it) }
+
+  return lst.toArray()
 }
 
 project.tasks['sonarqube'].dependsOn jacocoTestReport
@@ -119,9 +141,10 @@ sonarqube {
   properties {
     property "sonar.projectName", "Reform :: opal-file-handler"
     property "sonar.projectKey", "uk.gov.hmcts.reform:opal-file-handler"
+    property "sonar.exclusions", coverageExclusions.join(', ')
+    property 'sonar.coverage.exclusions', "**/entity/*,**/model/*,**/exception/*,**/config/**,**/repository/**"
   }
 }
-
 // before committing a change, make sure task still works
 dependencyUpdates {
   def isNonStable = { String version ->
@@ -157,6 +180,11 @@ dependencies {
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-actuator'
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-aop'
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-json'
+  implementation group: 'org.springframework.boot', name: 'spring-boot-starter-data-jpa'
+  implementation group: 'org.springframework.boot', name: 'spring-boot-starter-quartz'
+  implementation group: 'org.springframework.boot', name: 'spring-boot-starter-integration'
+  implementation group: 'org.springframework.integration', name: 'spring-integration-sftp'
+  implementation group: 'org.springframework.integration', name: 'spring-integration-file'
   implementation group: 'org.springdoc', name: 'springdoc-openapi-starter-webmvc-ui', version: '2.6.0'
 
   implementation group: 'com.github.hmcts.java-logging', name: 'logging', version: '6.1.5'
@@ -165,6 +193,14 @@ dependencies {
   implementation group: 'org.apache.logging.log4j', name: 'log4j-to-slf4j', version: log4JVersion
   implementation group: 'ch.qos.logback', name: 'logback-classic', version: logbackVersion
   implementation group: 'ch.qos.logback', name: 'logback-core', version: logbackVersion
+
+  compileOnly 'org.projectlombok:lombok:1.18.34'
+  annotationProcessor 'org.projectlombok:lombok:1.18.34'
+
+  testCompileOnly 'org.projectlombok:lombok:1.18.34'
+  testAnnotationProcessor 'org.projectlombok:lombok:1.18.34'
+
+  implementation 'org.postgresql:postgresql'
 
   implementation group: 'io.rest-assured', name: 'rest-assured'
 
