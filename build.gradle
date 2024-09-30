@@ -1,14 +1,10 @@
 plugins {
   id 'application'
   id 'jacoco'
-  id 'io.spring.dependency-management' version '1.1.5'
-  id 'org.springframework.boot' version '3.2.0'
+  id 'io.spring.dependency-management' version '1.1.6'
+  id 'org.springframework.boot' version '3.3.2'
   id 'com.github.ben-manes.versions' version '0.51.0'
-  id 'org.sonarqube' version '5.0.0.4638'
-  /*
-    Applies analysis tools including checkstyle and OWASP Dependency checker.
-    See https://github.com/hmcts/gradle-java-plugin
- */
+  id 'org.sonarqube' version '5.1.0.4882'
   id 'uk.gov.hmcts.java' version '0.12.63'
 }
 
@@ -22,6 +18,7 @@ java {
 }
 
 sourceSets {
+
   functionalTest {
     java {
       compileClasspath += main.output
@@ -59,6 +56,8 @@ configurations {
 
   smokeTestImplementation.extendsFrom testImplementation
   smokeTestRuntimeOnly.extendsFrom runtimeOnly
+
+  wsdl2java
 }
 
 tasks.withType(JavaCompile) {
@@ -82,20 +81,11 @@ test {
   failFast = true
 }
 
-task copyFunctionalReport(type: Copy) {
-  from("${rootDir}/target/site/serenity")
-  into("${rootDir}/functional-test-report")
-  logger.quiet("Functional Test Report available at - file://${rootDir}/functional-test-report/index.html")
-}
-
 task functional(type: Test) {
   description = "Runs functional tests"
   group = "Verification"
   testClassesDirs = sourceSets.functionalTest.output.classesDirs
-  reports.junitXml.getOutputLocation().set(layout.buildDirectory.dir("test-results/functional"))
   classpath = sourceSets.functionalTest.runtimeClasspath
-  gradle.startParameter.continueOnFailure = true
-  dependsOn('clearReports', 'copyFunctionalReport')
 }
 
 task integration(type: Test) {
@@ -106,26 +96,15 @@ task integration(type: Test) {
   failFast = true
 }
 
-
-task copySmokeReport(type: Copy) {
-  from("${rootDir}/target/site/serenity")
-  into("${rootDir}/smoke-test-report")
-  logger.quiet("Smoke Test Report available at - file://${rootDir}/smoke-test-report/index.html")
-}
-
 task smoke(type: Test) {
   description = "Runs Smoke Tests"
   testClassesDirs = sourceSets.smokeTest.output.classesDirs
-  reports.junitXml.getOutputLocation().set(layout.buildDirectory.dir("test-results/smoke"))
   classpath = sourceSets.smokeTest.runtimeClasspath
-  group = "Verification"
-  gradle.startParameter.continueOnFailure = true
-  dependsOn('clearReports', 'copySmokeReport')
 }
-
 def coverageExclusions = [
   '**/uk/gov/hmcts/reform/opal/model/**',
   '**/uk/gov/hmcts/reform/opal/config/**',
+  '**/uk/gov/hmcts/reform/opal/exception/**',
   '**/uk/gov/hmcts/reform/opal/repository/**'
 ]
 
@@ -156,18 +135,15 @@ static String[] jacocoExclusionArray(ArrayList<String> exclusions) {
 project.tasks['sonarqube'].dependsOn jacocoTestReport
 project.tasks['check'].dependsOn integration
 
-jacocoTestReport.dependsOn check
-jacocoTestCoverageVerification.dependsOn jacocoTestReport
-
 sonarqube {
   properties {
-    property "sonar.projectName", "Reform :: opal-file-handler"
-    property "sonar.projectKey", "uk.gov.hmcts.reform:opal-file-handler"
-    property "sonar.gradle.skipCompile", "true"
+    property "sonar.projectName", "HMCTS :: opal-external-api"
+    property "sonar.projectKey", "uk.gov.hmcts.reform:opal-external-api"
     property "sonar.exclusions", coverageExclusions.join(', ')
-    property 'sonar.coverage.exclusions', "**/entity/*,**/model/*,**/dto/*,**/config/*,**/repository/*"
+    property 'sonar.coverage.exclusions', "**/entity/*,**/model/*,**/exception/*,**/config/**,**/repository/jpa/*,**/opal/dto/*"
   }
 }
+
 // before committing a change, make sure task still works
 dependencyUpdates {
   def isNonStable = { String version ->
@@ -175,7 +151,7 @@ dependencyUpdates {
     def regex = /^[0-9,.v-]+$/
     return !stableKeyword && !(version ==~ regex)
   }
-  rejectVersionIf { selection -> // <---- notice how the closure argument is named
+  rejectVersionIf { selection ->
     return isNonStable(selection.candidate.version) && !isNonStable(selection.currentVersion)
   }
 }
@@ -188,12 +164,14 @@ dependencyCheck {
 repositories {
   mavenLocal()
   mavenCentral()
-  maven { url 'https://jitpack.io' }
+  maven { url 'https://jitpack.io'
+  }
+  maven { url "https://build.shibboleth.net/maven/releases/" }
 }
 
 ext {
   log4JVersion = "2.23.1"
-  logbackVersion = "1.5.6"
+  logbackVersion = "1.5.7"
 }
 
 ext['snakeyaml.version'] = '2.0'
