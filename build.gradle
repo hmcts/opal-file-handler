@@ -106,10 +106,9 @@ task smoke(type: Test) {
 }
 
 def coverageExclusions = [
-  '**/uk/gov/hmcts/opal/**/model/**',
-  '**/uk/gov/hmcts/opal/**/config/**',
-  '**/uk/gov/hmcts/opal/**/repository/**',
-  '**/uk/gov/hmcts/opal/**/exception/**'
+  '**/uk/gov/hmcts/reform/opal/model/**',
+  '**/uk/gov/hmcts/reform/opal/config/**',
+  '**/uk/gov/hmcts/reform/opal/repository/**'
 ]
 
 jacocoTestReport {
@@ -139,12 +138,16 @@ static String[] jacocoExclusionArray(ArrayList<String> exclusions) {
 project.tasks['sonarqube'].dependsOn jacocoTestReport
 project.tasks['check'].dependsOn integration
 
+jacocoTestReport.dependsOn check
+jacocoTestCoverageVerification.dependsOn jacocoTestReport
+
 sonarqube {
   properties {
     property "sonar.projectName", "Reform :: opal-file-handler"
     property "sonar.projectKey", "uk.gov.hmcts.reform:opal-file-handler"
+    property "sonar.gradle.skipCompile", "true"
     property "sonar.exclusions", coverageExclusions.join(', ')
-    property 'sonar.coverage.exclusions', "**/entity/*,**/model/*,**/exception/*,**/config/**,**/repository/**"
+    property 'sonar.coverage.exclusions', "**/entity/*,**/model/*,**/dto/*,**/config/*,**/repository/*"
   }
 }
 // before committing a change, make sure task still works
