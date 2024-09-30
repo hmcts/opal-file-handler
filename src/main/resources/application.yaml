@@ -2,6 +2,8 @@ server:
   port: 4553
   shutdown: "graceful"
 
+
+
 management:
   endpoint:
     health:
@@ -11,6 +13,9 @@ management:
       base-path: /
       exposure:
         include: health, info, prometheus
+
+
+
 
 springdoc:
   packagesToScan: uk.gov.hmcts.reform.file-handler.controllers
@@ -23,7 +28,7 @@ spring:
     name: Opal File Handler
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://${OPAL_FILE_DB_HOST:localhost}:${OPAL_FILE_DB_PORT:5434}/${OPAL_FILE_DB_NAME:opal-file-db}${OPAL_FILE_DB_OPTIONS:}
+    url: jdbc:postgresql://${OPAL_FILE_DB_HOST:localhost}:${OPAL_FILE_DB_PORT:5432}/${OPAL_FILE_DB_NAME:opal-file-db}${OPAL_FILE_DB_OPTIONS:}
     username: ${OPAL_FILE_DB_USERNAME:opal-file}
     password: ${OPAL_FILE_DB_PASSWORD:opal-file}
     properties:
@@ -55,7 +60,3 @@ dbMigration:
 azure:
   application-insights:
     instrumentation-key: ${opal.AppInsightsInstrumentationKey:00000000-0000-0000-0000-000000000000}
-
-logging:
-  level:
-    root: DEBUG
