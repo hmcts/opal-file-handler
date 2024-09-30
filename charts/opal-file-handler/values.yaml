@@ -3,10 +3,21 @@ java:
   image: 'sdshmctpsublic.azurecr.io/opal/file-handler:latest'
   ingressHost: opal-file-handler-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
   aadIdentityName: opal
-#  Uncomment once the vault containing the app insights key has been set up
-#  keyVaults:
-#    opal:
-#      secrets:
-#        - name: AppInsightsInstrumentationKey
-#          alias: azure.application-insights.instrumentation-key
+  keyVaults:
+    opal:
+      secrets:
+        - name: app-insights-connection-string
+          alias: app-insights-connection-string
+        - name: file-handler-POSTGRES-HOST
+          alias: OPAL_FILE_DB_HOST
+        - name: file-handler-POSTGRES-PASS
+          alias: OPAL_FILE_DB_PASSWORD
+        - name: file-handler-POSTGRES-PORT
+          alias: OPAL_FILE_DB_PORT
+        - name: file-handler-POSTGRES-USER
+          alias: OPAL_FILE_DB_USERNAME
+        - name: file-handler-POSTGRES-DATABASE
+          alias: OPAL_FILE_DB_NAME 
+ 
   environment:
+    RUN_DB_MIGRATION_ON_STARTUP: true
