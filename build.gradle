@@ -82,12 +82,20 @@ test {
   failFast = true
 }
 
+task copyFunctionalReport(type: Copy) {
+  from("${rootDir}/target/site/serenity")
+  into("${rootDir}/functional-test-report")
+  logger.quiet("Functional Test Report available at - file://${rootDir}/functional-test-report/index.html")
+}
+
 task functional(type: Test) {
   description = "Runs functional tests"
   group = "Verification"
   testClassesDirs = sourceSets.functionalTest.output.classesDirs
   reports.junitXml.getOutputLocation().set(layout.buildDirectory.dir("test-results/functional"))
   classpath = sourceSets.functionalTest.runtimeClasspath
+  gradle.startParameter.continueOnFailure = true
+  dependsOn('clearReports', 'copyFunctionalReport')
 }
 
 task integration(type: Test) {
@@ -98,11 +106,21 @@ task integration(type: Test) {
   failFast = true
 }
 
+
+task copySmokeReport(type: Copy) {
+  from("${rootDir}/target/site/serenity")
+  into("${rootDir}/smoke-test-report")
+  logger.quiet("Smoke Test Report available at - file://${rootDir}/smoke-test-report/index.html")
+}
+
 task smoke(type: Test) {
   description = "Runs Smoke Tests"
   testClassesDirs = sourceSets.smokeTest.output.classesDirs
   reports.junitXml.getOutputLocation().set(layout.buildDirectory.dir("test-results/smoke"))
   classpath = sourceSets.smokeTest.runtimeClasspath
+  group = "Verification"
+  gradle.startParameter.continueOnFailure = true
+  dependsOn('clearReports', 'copySmokeReport')
 }
 
 def coverageExclusions = [
