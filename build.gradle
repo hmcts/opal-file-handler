@@ -157,13 +157,6 @@ def coverageExclusions = [
   '**/uk/gov/hmcts/reform/opal/repository/**'
 ]
 
-def coverageExclusions = [
-  '**/uk/gov/hmcts/reform/opal/**/model/**',
-  '**/uk/gov/hmcts/reform/opal/**/config/**',
-  '**/uk/gov/hmcts/reform/opal/authentication/client/**',
-  '**/uk/gov/hmcts/reform/opal/**/exception/**'
-]
-
 jacocoTestReport {
   executionData(test, integration)
   reports {
@@ -250,6 +243,8 @@ dependencies {
   implementation group: 'org.apache.logging.log4j', name: 'log4j-to-slf4j', version: log4JVersion
   implementation group: 'ch.qos.logback', name: 'logback-classic', version: logbackVersion
   implementation group: 'ch.qos.logback', name: 'logback-core', version: logbackVersion
+
+  implementation 'jakarta.xml.bind:jakarta.xml.bind-api:4.0.2'
 
   compileOnly 'org.projectlombok:lombok:1.18.34'
   annotationProcessor 'org.projectlombok:lombok:1.18.34'
