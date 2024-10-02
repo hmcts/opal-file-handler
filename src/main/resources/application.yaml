@@ -30,9 +30,9 @@ spring:
       write_dates_as_timestamps: false
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://${OPAL_FINES_DB_HOST:localhost}:${OPAL_FINES_DB_PORT:5432}/${OPAL_FINES_DB_NAME:opal-fines-db}${OPAL_FINES_DB_OPTIONS:}
-    username: ${OPAL_FINES_DB_USERNAME:opal-fines}
-    password: ${OPAL_FINES_DB_PASSWORD:opal-fines}
+    url: jdbc:postgresql://${OPAL_FILE_DB_HOST:localhost}:${OPAL_FILE_DB_PORT:5432}/${OPAL_FILE_DB_NAME:opal-file-db}${OPAL_USER_DB_OPTIONS:}
+    username: ${OPAL_FILE_DB_USERNAME:opal-file}
+    password: ${OPAL_FILE_DB_PASSWORD:opal-file}
     properties:
       charSet: UTF-8
     hikari:
@@ -54,6 +54,7 @@ spring:
             non_contextual_creation: true
   flyway:
     baseline-on-migrate: true
+    enabled: true
 
 dbMigration:
   # When true, the app will run DB migration on startup.
