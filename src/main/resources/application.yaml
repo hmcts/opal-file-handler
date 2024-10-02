@@ -25,6 +25,9 @@ spring:
     import: "optional:configtree:/mnt/secrets/opal/"
   application:
     name: Opal File Handler
+  jackson:
+    serialization:
+      write_dates_as_timestamps: false
   datasource:
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://${OPAL_FILE_DB_HOST:localhost}:${OPAL_FILE_DB_PORT:5432}/${OPAL_FILE_DB_NAME:opal-file-db}${OPAL_USER_DB_OPTIONS:}
@@ -40,8 +43,10 @@ spring:
       maxLifetime: 7200000
       connectionTimeout: 30000
   jpa:
+    show-sql: false
     properties:
       hibernate:
+        format_sql: false
         dialect: org.hibernate.dialect.PostgreSQLDialect
         jdbc:
           lob:
@@ -59,3 +64,52 @@ dbMigration:
 azure:
   application-insights:
     instrumentation-key: ${opal.AppInsightsInstrumentationKey:00000000-0000-0000-0000-000000000000}
+
+quartzProperties:
+  org.quartz:
+    scheduler:
+      instanceId: AUTO
+    jobStore:
+      isClustered: true
+      class: org.springframework.scheduling.quartz.LocalDataSourceJobStore
+      driverDelegateClass: org.quartz.impl.jdbcjobstore.PostgreSQLDelegate
+      dataSource: dataSource
+      clusterCheckinInterval: 2000
+      misfireThreshold: 60000
+    threadPool:
+      class: org.quartz.simpl.SimpleThreadPool
+      threadCount: 8
+
+opal:
+  sftp:
+    inbound:
+      host: ${OPAL_SFTP_INBOUND_HOST:localhost}
+      port: ${OPAL_SFTP_INBOUND_PORT:2222}
+      user: ${OPAL_SFTP_INBOUND_USER:inbound}
+      password: ${OPAL_SFTP_INBOUND_PASSWORD:password}
+      location: ${OPAL_SFTP_INBOUND_LOCATION:inbound}
+      create-sub-locations: ${OPAL_SFTP_INBOUND_CREATE_SUB_LOCATIONS:true}
+    outbound:
+      host: ${OPAL_SFTP_OUTBOUND_HOST:localhost}
+      port: ${OPAL_SFTP_OUTBOUND_PORT:2222}
+      user: ${OPAL_SFTP_OUTBOUND_USER:outbound}
+      password: ${OPAL_SFTP_OUTBOUND_PASSWORD:password}
+      location: ${OPAL_SFTP_OUTBOUND_LOCATION:outbound}
+      create-sub-locations: ${OPAL_SFTP_OUTBOUND_CREATE_SUB_LOCATIONS:true}
+  schedule:
+    auto-check-job:
+      cron: ${OPAL_AUTO_CHECK_JOB_CRON:0 0 0 * * ?}
+      file-name: ${OPAL_AUTO_CHECK_JOB_FILE_NAME:test.txt}
+    auto-cash-job:
+      cron: ${OPAL_AUTO_CASH_JOB_CRON:0 0 0 * * ?}
+      file-name: ${OPAL_AUTO_CASH_JOB_FILE_NAME:test.txt}
+    dwp-bailiffs-job:
+      cron: ${OPAL_DWP_BAILIFFS_JOB_CRON:0 50 * * * ?}
+      file-name: ${OPAL_DWP_BAILIFFS_JOB_FILE_NAME:test.txt}
+    all-pay-archive-job:
+      cron: ${OPAL_ALL_PAY_ARCHIVE_JOB_CRON:0 0 0 * * ?}
+      file-name: ${OPAL_ALL_PAY_ARCHIVE_JOB_FILE_NAME:test.txt}
+    log-retention-job:
+      cron: ${OPAL_LOG_RETENTION_JOB_CRON:0 0 0 * * ?}
+    file-handler-job:
+      cron: ${OPAL_FILE_HANDLER_JOB_CRON:0 0 0 * * ?}

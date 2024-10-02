@@ -32,18 +32,14 @@ sourceSets {
       runtimeClasspath += main.output
       srcDir file('src/functionalTest/java')
     }
-    resources.srcDir file('src/functionalTest/resources')
   }
-
   integrationTest {
     java {
       compileClasspath += main.output
       runtimeClasspath += main.output
       srcDir file('src/integrationTest/java')
     }
-    resources.srcDir file('src/integrationTest/resources')
   }
-
 }
 
 configurations {
@@ -55,6 +51,8 @@ configurations {
 
   smokeTestImplementation.extendsFrom testImplementation
   smokeTestRuntimeOnly.extendsFrom runtimeOnly
+
+  wsdl2java
 }
 
 tasks.withType(JavaCompile) {
@@ -75,7 +73,7 @@ tasks.withType(Test) {
 }
 
 test {
-  failFast = true
+  failFast = false
 }
 
 task integration(type: Test) {
@@ -152,21 +150,35 @@ task smoke() {
   tasks.copySmokeReport.mustRunAfter aggregate
 
 }
-
 def coverageExclusions = [
-  '**/uk/gov/hmcts/reform/opal/**/model/**',
-  '**/uk/gov/hmcts/reform/opal/**/config/**',
-  '**/uk/gov/hmcts/reform/opal/authentication/client/**',
-  '**/uk/gov/hmcts/reform/opal/**/exception/**'
+  '**/uk/gov/hmcts/reform/opal/model/**',
+  '**/uk/gov/hmcts/reform/opal/config/**',
+  '**/uk/gov/hmcts/reform/opal/exception/**',
+  '**/uk/gov/hmcts/reform/opal/repository/**'
 ]
 
 jacocoTestReport {
   executionData(test, integration)
   reports {
     xml.required = true
-    csv.required = false
     html.required = true
+    csv.required = false
+    html.outputLocation.set(layout.buildDirectory.dir("jacocoHtml"))
   }
+  afterEvaluate {
+    classDirectories.setFrom(files(classDirectories.files.collect {
+      fileTree(dir: it, exclude: jacocoExclusionArray(coverageExclusions)
+      )
+    }))
+  }
+}
+
+static String[] jacocoExclusionArray(ArrayList<String> exclusions) {
+  final def lst = new ArrayList<String>()
+
+  exclusions.stream().forEach { it.endsWith(".java") ? lst.add(it.replace(".java", ".class")) : lst.add(it) }
+
+  return lst.toArray()
 }
 
 project.tasks['sonarqube'].dependsOn jacocoTestReport
@@ -174,8 +186,10 @@ project.tasks['check'].dependsOn integration
 
 sonarqube {
   properties {
-    property "sonar.projectName", "Reform :: opal-file-handler"
-    property "sonar.projectKey", "uk.gov.hmcts.reform:opal-file-handler"
+    property "sonar.projectName", "HMCTS :: opal-external-api"
+    property "sonar.projectKey", "uk.gov.hmcts.reform:opal-external-api"
+    property "sonar.exclusions", coverageExclusions.join(', ')
+    property 'sonar.coverage.exclusions', "**/entity/*,**/model/*,**/exception/*,**/config/**,**/repository/jpa/*,**/opal/dto/*"
   }
 }
 
@@ -186,7 +200,7 @@ dependencyUpdates {
     def regex = /^[0-9,.v-]+$/
     return !stableKeyword && !(version ==~ regex)
   }
-  rejectVersionIf { selection -> // <---- notice how the closure argument is named
+  rejectVersionIf { selection ->
     return isNonStable(selection.candidate.version) && !isNonStable(selection.currentVersion)
   }
 }
@@ -199,7 +213,9 @@ dependencyCheck {
 repositories {
   mavenLocal()
   mavenCentral()
-  maven { url 'https://jitpack.io' }
+  maven { url 'https://jitpack.io'
+  }
+  maven { url "https://build.shibboleth.net/maven/releases/" }
 }
 
 ext {
@@ -215,6 +231,10 @@ dependencies {
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-aop'
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-json'
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-data-jpa'
+  implementation group: 'org.springframework.boot', name: 'spring-boot-starter-quartz'
+  implementation group: 'org.springframework.boot', name: 'spring-boot-starter-integration'
+  implementation group: 'org.springframework.integration', name: 'spring-integration-sftp'
+  implementation group: 'org.springframework.integration', name: 'spring-integration-file'
   implementation group: 'org.springdoc', name: 'springdoc-openapi-starter-webmvc-ui', version: '2.6.0'
 
   implementation group: 'com.github.hmcts.java-logging', name: 'logging', version: '6.1.6'
@@ -223,6 +243,16 @@ dependencies {
   implementation group: 'org.apache.logging.log4j', name: 'log4j-to-slf4j', version: log4JVersion
   implementation group: 'ch.qos.logback', name: 'logback-classic', version: logbackVersion
   implementation group: 'ch.qos.logback', name: 'logback-core', version: logbackVersion
+
+  implementation 'jakarta.xml.bind:jakarta.xml.bind-api:4.0.2'
+
+  compileOnly 'org.projectlombok:lombok:1.18.34'
+  annotationProcessor 'org.projectlombok:lombok:1.18.34'
+
+  testCompileOnly 'org.projectlombok:lombok:1.18.34'
+  testAnnotationProcessor 'org.projectlombok:lombok:1.18.34'
+
+  implementation 'org.postgresql:postgresql:42.7.3'
 
   implementation group: 'io.rest-assured', name: 'rest-assured'
 
