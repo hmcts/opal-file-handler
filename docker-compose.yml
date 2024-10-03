@@ -2,7 +2,7 @@
 services:
   opal-file-db:
     container_name: opal-file-db
-    image: postgres:16
+    image: postgres:17
     restart: always
     environment:
       - POSTGRES_DB=opal-file-db
