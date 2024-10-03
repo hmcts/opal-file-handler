@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns="http://www.dwp.gsi.gov.uk/pacs"
+           targetNamespace="http://www.dwp.gsi.gov.uk/pacs"
+           elementFormDefault="qualified">
+
+  <xs:element name="PacsTppSchedule">
+    <xs:complexType>
+      <xs:sequence>
+        <!-- DocumentHeader element -->
+        <xs:element name="DocumentHeader">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="CreditorID" type="xs:string"/>
+              <xs:element name="BatchNumber" type="xs:string"/>
+              <xs:element name="PacsDocumentCreationDate" type="xs:date"/>
+              <xs:element name="PacsDocumentCreationTime" type="xs:time"/>
+              <xs:element name="NotificationReference" type="xs:string"/>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+
+        <!-- DocumentDetail elements (repeated) -->
+        <xs:element name="DocumentDetail" maxOccurs="unbounded">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="CustomerRef" type="xs:string"/>
+              <xs:element name="RecordType" type="xs:string"/>
+              <xs:element name="LocationCode" type="xs:string"/>
+              <xs:element name="NationalInsuranceNumberType" type="xs:string" minOccurs="0"/>
+              <xs:element name="DateFrom" type="xs:date"/>
+              <xs:element name="DateTo" type="xs:date"/>
+              <xs:element name="DetailAmountType" type="xs:string"/>
+              <xs:element name="DetailAmountSign" type="xs:string"/>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+
+        <!-- DocumentSummary element -->
+        <xs:element name="DocumentSummary">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="SummaryAmountType" type="xs:string"/>
+              <xs:element name="SummaryAmountSign" type="xs:string"/>
+              <xs:element name="Total02Records" type="xs:int"/>
+              <xs:element name="Total03Records" type="xs:int"/>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>
