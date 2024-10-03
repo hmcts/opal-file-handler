@@ -9,7 +9,7 @@ import java.util.List;
 
 @XmlRootElement(name = "PacsTppSchedule")
 @Data
-public class DwpFile implements FileContent{
+public class DwpFile implements FileContent {
 
     private DocumentHeader documentHeader;
     private List<DocumentDetail> documentDetails;
