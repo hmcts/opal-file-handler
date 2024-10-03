@@ -11,11 +11,11 @@ import java.util.List;
 @Data
 public class DwpFile implements FileContent{
 
-        private DocumentHeader documentHeader;
-        private List<DocumentDetail> documentDetails;
-        private DocumentSummary documentSummary;
+    private DocumentHeader documentHeader;
+    private List<DocumentDetail> documentDetails;
+    private DocumentSummary documentSummary;
 
-        public DwpFile toDwpFile(String fileContents) throws JAXBException {
-            return XMLUtil.unmarshal(fileContents, DwpFile.class);
-        }
+    public DwpFile toDwpFile(String fileContents) throws JAXBException {
+        return XMLUtil.unmarshal(fileContents, DwpFile.class);
+    }
 }

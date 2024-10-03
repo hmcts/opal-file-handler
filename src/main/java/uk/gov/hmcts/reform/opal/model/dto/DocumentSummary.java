@@ -9,4 +9,4 @@ public  class DocumentSummary {
     private int total02Records;
     private int total03Records;
 
-    }
+}
