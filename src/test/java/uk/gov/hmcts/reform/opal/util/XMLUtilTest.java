@@ -27,7 +27,7 @@ public class XMLUtilTest {
     }
 
     @Test
-    void unmarshalValidXmlStringToObject() throws JAXBException {;
+    void unmarshalValidXmlStringToObject() throws JAXBException {
         DwpFile sample = XMLUtil.unmarshal(getSampleXml(), DwpFile.class);
         Assertions.assertNotNull(sample);
         Assertions.assertEquals("456", sample.getDocumentHeader().getBatchNumber());
