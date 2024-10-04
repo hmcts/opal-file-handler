@@ -1,3 +1,18 @@
+/**
+*
+* CGI OPAL Program
+*
+* MODULE      : job_schedule.sql
+*
+* DESCRIPTION : Create Jo Scheduling Tables 
+*
+* VERSION HISTORY:
+*
+* Date          Author      Version     Nature of Change
+* ----------    -------     --------    ----------------------------------------------------------------------------
+* 04/10/2024    D Clarke    1.0         Create Job Scheduling Tables
+*
+**/
 -- In your Quartz properties file, you'll need to set
 -- org.quartz.jobStore.driverDelegateClass = org.quartz.impl.jdbcjobstore.PostgreSQLDelegate
 
