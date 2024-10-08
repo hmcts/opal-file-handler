@@ -26,8 +26,8 @@ CREATE TABLE document_tracker
 ,bdu_total          bigint
 ,status             varchar(40)
 ,message            varchar(500)
+,CONSTRAINT dt_doc_id_pk PRIMARY KEY (doc_id)
 );
 
-CREATE INDEX dt_doc_id_idx ON document_tracker (doc_id);
-CREATE INDEX dt_file_name_idx ON document_tracker (file_name);
-CREATE INDEX dt_start_time_idx ON document_tracker (start_time);
+CREATE UNIQUE INDEX dt_file_name_idx ON document_tracker (file_name);
+CREATE UNIQUE INDEX dt_start_time_idx ON document_tracker (start_time);

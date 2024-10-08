@@ -21,4 +21,4 @@ CREATE TABLE ant_ct_bank_account
 ,dwp_court_code   varchar(20)
 );
 
-CREATE INDEX acba_dwp_court_code_idx ON ant_ct_bank_account (dwp_court_code);
+CREATE UNIQUE INDEX acba_dwp_court_code_idx ON ant_ct_bank_account (dwp_court_code);

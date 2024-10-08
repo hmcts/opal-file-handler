@@ -25,4 +25,4 @@ CREATE TABLE cheque_bank_amalgamated
 ,update_timestamp       timestamp
 );
 
-CREATE INDEX cba_amalgamated_master_ct_idx ON cheque_bank_amalgamated (amalgamated_ct, master_ct);
+CREATE UNIQUE INDEX cba_amalgamated_master_ct_idx ON cheque_bank_amalgamated (amalgamated_ct, master_ct);

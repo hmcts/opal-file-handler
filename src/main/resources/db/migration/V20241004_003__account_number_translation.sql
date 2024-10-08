@@ -37,6 +37,6 @@ COMMENT ON COLUMN account_number_translation2.date_close_status IS 'Timestamp fo
 COMMENT ON COLUMN account_number_translation2.insert_date_time_stamp IS 'Timestamp for when the record was inserted (session start time)';
 COMMENT ON COLUMN account_number_translation2.update_date_time_stamp IS 'Timestamp for when the record was updated, e.g. CLOSE_STATUS, (session start time)';
 
-CREATE INDEX ant2_mcc_ct_ref_idx ON account_number_translation2 (mcc_ct, reference);
+CREATE UNIQUE INDEX ant2_mcc_ct_ref_idx ON account_number_translation2 (mcc_ct, reference);
 
 CREATE SEQUENCE IF NOT EXISTS ant2_id_seq INCREMENT 1 START 1 MINVALUE 1 NO MAXVALUE CACHE 20 OWNED BY account_number_translation2.id;

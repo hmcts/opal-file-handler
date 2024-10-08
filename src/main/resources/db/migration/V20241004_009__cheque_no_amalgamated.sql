@@ -24,4 +24,4 @@ CREATE TABLE cheque_no_amalgamated
 ,encountered_timestamp  timestamp
 );
 
-CREATE INDEX cna_amalgamated_ct_old_cheque_idx ON cheque_no_amalgamated (amalgamated_ct, old_cheque_no);
+CREATE UNIQUE INDEX cna_amalgamated_ct_old_cheque_idx ON cheque_no_amalgamated (amalgamated_ct, old_cheque_no);

@@ -22,4 +22,4 @@ CREATE TABLE output_fname
 ,full_path          varchar(500)    not null
 );
 
-CREATE INDEX of_doc_id_idx ON output_fname (doc_id);
+CREATE UNIQUE INDEX of_doc_id_idx ON output_fname (doc_id);

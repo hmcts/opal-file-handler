@@ -23,4 +23,4 @@ CREATE TABLE ant_ct_amalgamated
 ,update_timestamp       timestamp
 );
 
-CREATE INDEX acm_amalgamated_ct_idx ON ant_ct_amalgamated (amalgamated_ct);
+CREATE UNIQUE INDEX acm_amalgamated_ct_idx ON ant_ct_amalgamated (amalgamated_ct);
