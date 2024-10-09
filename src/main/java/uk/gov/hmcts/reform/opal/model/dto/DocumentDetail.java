@@ -20,7 +20,7 @@ public  class DocumentDetail {
     private String dateFrom;
     @XmlElement(name = "DateTo", namespace = "http://www.dwp.gsi.gov.uk/pacs")
     private String dateTo;
-    @XmlElement(name = "DetailAmount", namespace = "http://www.dwp.gsi.gov.uk/pacs")
+    @XmlElement(name = "DetailAmountType", namespace = "http://www.dwp.gsi.gov.uk/pacs")
     private String detailAmountType;
     @XmlElement(name = "DetailAmountSign", namespace = "http://www.dwp.gsi.gov.uk/pacs")
     private String detailAmountSign;

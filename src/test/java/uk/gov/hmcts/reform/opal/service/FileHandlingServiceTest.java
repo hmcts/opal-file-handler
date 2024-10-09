@@ -6,13 +6,18 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import uk.gov.hmcts.reform.opal.model.dto.DwpFile;
 import uk.gov.hmcts.reform.opal.model.dto.OpalFile;
 import uk.gov.hmcts.reform.opal.model.dto.StandardBankingFile;
 import uk.gov.hmcts.reform.opal.sftp.SftpInboundService;
+import uk.gov.hmcts.reform.opal.util.XMLUtil;
+import uk.gov.hmcts.reform.opal.util.XMLUtilTest;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.List;
 import java.util.function.Consumer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -20,11 +25,15 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.opal.sftp.SftpLocation.DWP_BAILIFFS;
+import static uk.gov.hmcts.reform.opal.sftp.SftpLocation.DWP_BAILIFFS_PROCESSING;
 
 @SuppressWarnings("unchecked")
 class FileHandlingServiceTest {
@@ -38,6 +47,17 @@ class FileHandlingServiceTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
+    }
+
+    @Test
+    void testGetListOfFilesToProcess() {
+        when(sftpInboundService.listFiles(DWP_BAILIFFS.getPath())).thenReturn(Arrays.asList("file1.txt", "file2.txt"));
+
+        List<String> result = fileHandlingService.getListOfFilesToProcess();
+
+        verify(sftpInboundService, times(2))
+            .moveFile(eq(DWP_BAILIFFS.getPath()), anyString(), eq(DWP_BAILIFFS_PROCESSING.getPath()));
+        assertEquals(result.size(), 2);
     }
 
     @Test
@@ -63,6 +83,34 @@ class FileHandlingServiceTest {
         assertEquals(fileName, result.getOriginalFileName());
         assertTrue(result.getFileContent() instanceof StandardBankingFile);
         assertEquals(fileContent, StandardBankingFile.toString((StandardBankingFile) result.getFileContent()));
+
+        verify(sftpInboundService, times(1)).downloadFile(eq(path), eq(fileName),
+                                                          any(Consumer.class));
+    }
+
+    @Test
+    void testCreateOpalFile_Success_Dwp() throws Exception {
+        // Arrange
+        String fileName = "testFile.txt";
+        String path = "/path/to/file";
+        String fileContent = XMLUtilTest.getSampleXml();
+
+        doAnswer(invocation -> {
+            Consumer<InputStream> consumer = invocation.getArgument(2);
+            ByteArrayInputStream inputStream = new ByteArrayInputStream(fileContent.getBytes(StandardCharsets.UTF_8));
+            consumer.accept(inputStream);
+            return null;
+        }).when(sftpInboundService).downloadFile(eq(path), eq(fileName), Mockito.<Consumer<InputStream>>any());
+
+
+        // Act
+        OpalFile result = fileHandlingService.createOpalFile(fileName, true, path);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(fileName, result.getOriginalFileName());
+        assertTrue(result.getFileContent() instanceof DwpFile);
+        assertEquals(fileContent, XMLUtil.marshal(result.getFileContent()));
 
         verify(sftpInboundService, times(1)).downloadFile(eq(path), eq(fileName),
                                                           any(Consumer.class));
