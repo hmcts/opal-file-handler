@@ -44,7 +44,7 @@ public class XMLUtilTest {
         Assertions.assertThrows(IllegalArgumentException.class, () -> XMLUtil.unmarshal("", DwpFile.class));
     }
 
-    private String getSampleXml() {
+    public static String getSampleXml() {
         return """
             <?xml version="1.0" encoding="UTF-8"?>
             <PacsTppSchedule xmlns="http://www.dwp.gsi.gov.uk/pacs" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"

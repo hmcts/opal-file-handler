@@ -50,6 +50,8 @@ public class SftpService {
         List<String> filenames = new ArrayList<>();
         try (SftpSession session = sessionFactory.getSession()) {
             Arrays.stream(session.list(directoryPath))
+                .filter(file -> !file.getAttributes().isDirectory())
+                .filter(file -> !file.getFilename().equalsIgnoreCase(".DS_Store"))
                 .forEach(file -> filenames.add(file.getFilename()));
         } catch (IOException e) {
             log.error("Error listing files in directory: " + directoryPath, e);

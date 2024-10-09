@@ -44,13 +44,14 @@ class SftpLocationTest {
             SftpLocation.DWP_BAILIFFS,
             SftpLocation.DWP_BAILIFFS_SUCCESS,
             SftpLocation.DWP_BAILIFFS_PROCESSING,
-            SftpLocation.DWP_BAILIFFS_ERROR
+            SftpLocation.DWP_BAILIFFS_ERROR,
+            SftpLocation.DWP_BAILIFFS_ARCHIVE
         );
         List<SftpLocation> outboundLocations = Arrays.asList(SftpLocation.ALL_PAY,
                                                              SftpLocation.ALL_PAY_ARCHIVE,
                                                              SftpLocation.PRINT_LOCATION);
 
-        assertEquals(16, SftpLocation.getInboundLocations().size());
+        assertEquals(17, SftpLocation.getInboundLocations().size());
         assertEquals(inboundLocations, SftpLocation.getInboundLocations());
         assertEquals(outboundLocations, SftpLocation.getOutboundLocations());
     }

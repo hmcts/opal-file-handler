@@ -55,7 +55,8 @@ public class StandardBankingFile implements FileContent {
             FinancialTransaction financialTransaction = FinancialTransaction.builder()
                 .branchSortCode(line.substring(0, 6))  // Position 0-5 (inclusive)
                 .branchAccountNumber(line.substring(6, 14))  // Position 6-13 (inclusive)
-                .transactionCode(line.substring(14, 17))  // Position 14-16 (inclusive)
+                .accountType(line.substring(14, 15))  // Position 14 (inclusive)
+                .transactionType(line.substring(15, 17))  // Position 15-16 (inclusive)
                 .originatorsSortCode(line.substring(17, 23))  // Position 17-22 (inclusive)
                 .originatorsAccountNumber(line.substring(23, 31))  // Position 23-30 (inclusive)
                 .originatorsReference(line.substring(31, 35))  // Position 31-34 (inclusive)
@@ -79,24 +80,42 @@ public class StandardBankingFile implements FileContent {
         String spaces = " ".repeat(18);
         StringBuilder sb = new StringBuilder();
         sb.append(file.getHeader());
-        for (FinancialTransaction financialTransaction : file.getFinancialTransactions()) {
-            sb.append(System.lineSeparator())
-                .append(financialTransaction.getBranchSortCode())
-                .append(financialTransaction.getBranchAccountNumber())
-                .append(financialTransaction.getTransactionCode())
-                .append(financialTransaction.getOriginatorsSortCode())
-                .append(financialTransaction.getOriginatorsAccountNumber())
-                .append(financialTransaction.getOriginatorsReference())
-                .append(financialTransaction.getAmount())
-                .append(financialTransaction.getOriginatorsNameOrDescription())
-                .append(financialTransaction.getReferenceNumber())
-                .append(spaces)
-                .append(financialTransaction.getDate());
+
+        if (file.getFinancialTransactions() != null) {
+            // Iterate over each financial transaction
+            for (FinancialTransaction financialTransaction : file.getFinancialTransactions()) {
+                sb.append(System.lineSeparator())
+                    .append(fixedLengthString(substituteNull(financialTransaction.getBranchSortCode()), 6))
+                    .append(fixedLengthString(substituteNull(financialTransaction.getBranchAccountNumber()), 8))
+                    .append(fixedLengthString(substituteNull(financialTransaction.getAccountType()), 1))
+                    .append(fixedLengthString(substituteNull(financialTransaction.getTransactionType()), 2))
+                    .append(fixedLengthString(substituteNull(financialTransaction.getOriginatorsSortCode()), 6))
+                    .append(fixedLengthString(substituteNull(financialTransaction.getOriginatorsAccountNumber()), 8))
+                    .append(fixedLengthString(substituteNull(financialTransaction.getOriginatorsReference()), 4))
+                    .append(fixedLengthString(substituteNull(financialTransaction.getAmount()), 11))
+                    .append(fixedLengthString(substituteNull(financialTransaction
+                                                                 .getOriginatorsNameOrDescription()), 18))
+                    .append(fixedLengthString(substituteNull(financialTransaction.getReferenceNumber()), 18))
+                    .append(spaces) // Append the 18 spaces as per spec
+                    .append(fixedLengthString(substituteNull(financialTransaction.getDate()), 6));
+            }
         }
         sb.append(System.lineSeparator())
             .append(file.getFooter());
         return sb.toString();
 
+    }
+
+    private static String substituteNull(String value) {
+        return value == null ? "" : value;
+    }
+
+    private static String fixedLengthString(String value, int length) {
+        if (value.length() > length) {
+            return value.substring(0, length); // Truncate if longer
+        } else {
+            return String.format("%-" + length + "s", value); // Pad with spaces if shorter
+        }
     }
 
 }

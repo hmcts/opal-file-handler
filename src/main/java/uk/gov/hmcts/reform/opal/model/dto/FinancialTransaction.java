@@ -9,7 +9,8 @@ public class FinancialTransaction {
 
     private String branchSortCode;
     private String branchAccountNumber;
-    private String transactionCode;
+    private String accountType;
+    private String transactionType;
     private String originatorsSortCode;
     private String originatorsAccountNumber;
     private String originatorsReference;

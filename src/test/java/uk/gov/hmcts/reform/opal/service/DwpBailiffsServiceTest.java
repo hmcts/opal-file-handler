@@ -2,109 +2,92 @@ package uk.gov.hmcts.reform.opal.service;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.hmcts.reform.opal.model.dto.FileContent;
-import uk.gov.hmcts.reform.opal.model.dto.StandardBankingFile;
-import uk.gov.hmcts.reform.opal.sftp.SftpInboundService;
-import uk.gov.hmcts.reform.opal.transformer.AmalgamatedCTTransformer;
 import uk.gov.hmcts.reform.opal.model.dto.OpalFile;
+import uk.gov.hmcts.reform.opal.sftp.SftpLocation;
+import uk.gov.hmcts.reform.opal.transformer.AmalgamatedCTTransformer;
+import uk.gov.hmcts.reform.opal.transformer.DwpTransformer;
 
-import java.util.List;
+import java.util.Arrays;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.opal.sftp.SftpLocation.DWP_BAILIFFS;
-import static uk.gov.hmcts.reform.opal.sftp.SftpLocation.DWP_BAILIFFS_ERROR;
-import static uk.gov.hmcts.reform.opal.sftp.SftpLocation.DWP_BAILIFFS_PROCESSING;
-import static uk.gov.hmcts.reform.opal.sftp.SftpLocation.DWP_BAILIFFS_SUCCESS;
 
-@ExtendWith(MockitoExtension.class)
 class DwpBailiffsServiceTest {
 
+    @InjectMocks
+    private DwpBailiffsService dwpBailiffsService;
+
     @Mock
-    private SftpInboundService sftpInboundService;
+    private FileHandlingService fileHandlingService;
 
     @Mock
     private AmalgamatedCTTransformer amalgamatedCTTransformer;
 
-    private DwpBailiffsService dwpBailiffsService;
+    @Mock
+    private DwpTransformer dwpTransformer;
+
+    private final String processingPath = SftpLocation.DWP_BAILIFFS_PROCESSING.getPath();
+    private final String errorPath = SftpLocation.DWP_BAILIFFS_ERROR.getPath();
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         MockitoAnnotations.openMocks(this);
-        dwpBailiffsService = spy(new DwpBailiffsService(sftpInboundService, amalgamatedCTTransformer));
     }
 
     @Test
-    void processMovesFilesToProcessingAndProcessesThem() {
-        String fileName = "test.txt";
-        when(sftpInboundService.listFiles(DWP_BAILIFFS.getPath())).thenReturn(List.of(new String[]{fileName}));
+    void process_shouldProcessAllFiles() {
+        // Arrange
+        String fileName1 = "file1.txt";
+        String fileName2 = "file2.txt";
 
+        when(fileHandlingService.getListOfFilesToProcess()).thenReturn(Arrays.asList(fileName1, fileName2));
+        OpalFile opalFile = OpalFile.builder().build();
+        when(fileHandlingService.createOpalFile(eq(fileName1), eq(true), eq(processingPath))).thenReturn(opalFile);
+        when(fileHandlingService.createOpalFile(eq(fileName2), eq(true), eq(processingPath))).thenReturn(opalFile);
+        when(dwpTransformer.dwpTransform(opalFile)).thenReturn(opalFile);
+        when(amalgamatedCTTransformer.transformAmalgamatedCT(opalFile, false)).thenReturn(opalFile);
+
+        // Act
         dwpBailiffsService.process();
 
-        verify(sftpInboundService).moveFile(eq(DWP_BAILIFFS.getPath()), eq(fileName),
-                                            eq(DWP_BAILIFFS_PROCESSING.getPath()));
-        verify(sftpInboundService).listFiles(DWP_BAILIFFS.getPath());
+        // Assert
+        verify(fileHandlingService, times(2)).outputFileSuccess(any(OpalFile.class));
     }
 
     @Test
-    void testProcessSingleFile_Success() throws Exception {
+    void processSingleFile_shouldHandleException() {
         // Arrange
-        String fileName = "testFile.txt";;
-        FileContent testFileContent = StandardBankingFile.builder().header(new StringBuilder("header")).build();
-
-        OpalFile testFile = OpalFile.builder().newFileName(fileName).originalFileName(fileName)
-            .fileContent(testFileContent).build();
-
-        // Mocking createOpalFile to return a mock object of OpalFile
-        when(dwpBailiffsService.createOpalFile(fileName, true, DWP_BAILIFFS_PROCESSING.getPath()))
-            .thenReturn(testFile);
-
-        // Mocking applyTransformations to return an object (e.g., transformed file)
-
-        when(dwpBailiffsService.applyTransformations(testFile)).thenReturn(testFile);
+        String fileName = "file1.txt";
+        when(fileHandlingService.createOpalFile(eq(fileName), eq(true), eq(processingPath)))
+            .thenThrow(new RuntimeException("File error"));
 
         // Act
         dwpBailiffsService.processSingleFile(fileName);
 
         // Assert
-        // Verify that outputFileSuccess was called with the transformed file and success path
-        verify(dwpBailiffsService, times(1))
-            .outputFileSuccess(testFile, DWP_BAILIFFS_SUCCESS.getPath());
-
-        // Ensure outputFileError was not called
-        verify(dwpBailiffsService, never()).outputFileError(anyString(), anyString(), anyString());
+        verify(fileHandlingService).outputFileError(eq(fileName), eq(processingPath), eq(errorPath));
     }
 
     @Test
-    void testProcessSingleFile_Failure() throws Exception {
+    void applyTransformations_shouldReturnTransformedFile() {
         // Arrange
-        String fileName = "testFile.txt";
-        String processingPath = DWP_BAILIFFS_PROCESSING.getPath();
-        String errorPath = DWP_BAILIFFS_ERROR.getPath();
-
-        // Mock createOpalFile to throw an exception
-        when(dwpBailiffsService.createOpalFile(fileName, true, processingPath))
-            .thenThrow(new IndexOutOfBoundsException("Test Exception"));
+        OpalFile opalFile = OpalFile.builder().build();
+        when(dwpTransformer.dwpTransform(opalFile)).thenReturn(opalFile);
+        when(amalgamatedCTTransformer.transformAmalgamatedCT(opalFile, false)).thenReturn(opalFile);
 
         // Act
-        dwpBailiffsService.processSingleFile(fileName);
+        OpalFile transformedFile = dwpBailiffsService.applyTransformations(opalFile);
 
         // Assert
-        // Verify that outputFileError was called with the correct parameters
-        verify(dwpBailiffsService, times(1)).outputFileError(fileName, processingPath,
-                                                             errorPath);
-
-        // Ensure outputFileSuccess was never called
-        verify(dwpBailiffsService, never()).outputFileSuccess(any(), anyString());
+        assertEquals(opalFile, transformedFile);
+        verify(dwpTransformer).dwpTransform(opalFile);
+        verify(amalgamatedCTTransformer).transformAmalgamatedCT(opalFile, false);
     }
 }

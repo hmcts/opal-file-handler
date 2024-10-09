@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.opal.transformer;
 
+import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.opal.model.dto.DocumentDetail;
 import uk.gov.hmcts.reform.opal.model.dto.DwpFile;
 import uk.gov.hmcts.reform.opal.model.dto.FinancialTransaction;
@@ -11,12 +12,14 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
+@Component
 public class DwpTransformer {
 
 
     public OpalFile dwpTransform(OpalFile opalFile) {
 
         return OpalFile.builder()
+            .originalFileName(opalFile.getOriginalFileName())
             .newFileName(convertFileName(opalFile.getNewFileName()))
             .fileContent(populateStandardBankingFile((DwpFile) opalFile.getFileContent()))
             .build();
@@ -34,7 +37,8 @@ public class DwpTransformer {
                 financialTransactions.add(FinancialTransaction.builder()
                                               .branchSortCode("ANT_CT_BANK_ACCOUNT")
                                               .branchAccountNumber("ANT_CT_BANK_ACCOUNT")
-                                              .transactionCode("99")
+                                              .accountType("0")
+                                              .transactionType("99")
                                               .originatorsSortCode("0".repeat(6))
                                               .originatorsAccountNumber("0".repeat(8))
                                               .originatorsReference("0".repeat(4))
@@ -46,7 +50,9 @@ public class DwpTransformer {
             }
         }
         return StandardBankingFile.builder()
+            .header(new StringBuilder())
             .financialTransactions(financialTransactions)
+            .footer(new StringBuilder())
             .build();
     }
 

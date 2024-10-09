@@ -72,26 +72,26 @@ class FileHandlingServiceTest {
     void testOutputFileSuccess() throws Exception {
         // Arrange
         String fileName = "newTestFile.txt";
-        String path = "/path/to/success";
         OpalFile opalFile = OpalFile.builder().originalFileName("originalFile.txt").newFileName(fileName).build();
         opalFile.setFileContent(StandardBankingFile.builder().build());
-
         // Act
-        fileHandlingService.outputFileSuccess(opalFile, path);
-
+        fileHandlingService.outputFileSuccess(opalFile);
         // Assert
+        String pathSuccess = "dwp-bailiffs/success";
+        String processingPath = "dwp-bailiffs/processing";
+        String archivePath = "dwp-bailiffs/archive";
         verify(sftpInboundService, times(1))
-            .uploadFile(any(byte[].class), eq(path), eq(fileName));
+            .uploadFile(any(byte[].class), eq(pathSuccess), eq(fileName));
         verify(sftpInboundService, times(1))
-            .deleteFile(eq(path), eq(opalFile.getOriginalFileName()));
+            .moveFile(eq(processingPath), eq(opalFile.getOriginalFileName()), eq(archivePath));
     }
 
     @Test
     void testOutputFileError() {
         // Arrange
         String fileName = "errorFile.txt";
-        String oldPath = "/path/to/processing";
-        String newPath = "/path/to/error";
+        String oldPath = "dwp-bailiffs/processing";
+        String newPath = "dwp-bailiffs/error";
 
         // Act
         fileHandlingService.outputFileError(fileName, oldPath, newPath);
