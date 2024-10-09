@@ -44,11 +44,10 @@ public class XMLUtilTest {
         Assertions.assertThrows(IllegalArgumentException.class, () -> XMLUtil.unmarshal("", DwpFile.class));
     }
 
-    private String getSampleXml() {
+    public static String getSampleXml() {
         return """
-            <?xml version="1.0" encoding="UTF-8"?>
-            <PacsTppSchedule xmlns="http://www.dwp.gsi.gov.uk/pacs" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-            xsi:schemaLocation="http://www.dwp.gsi.gov.uk/pacs">
+            <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+            <PacsTppSchedule xmlns="http://www.dwp.gsi.gov.uk/pacs">
                 <DocumentHeader>
                     <CreditorID>123</CreditorID>
                     <BatchNumber>456</BatchNumber>
@@ -60,7 +59,6 @@ public class XMLUtilTest {
                     <CustomerRef>230001111</CustomerRef>
                     <RecordType>02</RecordType>
                     <LocationCode>100202</LocationCode>
-                    <NationalInsuranceNumberType></NationalInsuranceNumberType>
                     <DateFrom>2023-09-03</DateFrom>
                     <DateTo>2023-09-03</DateTo>
                     <DetailAmountType>0000000199</DetailAmountType>
@@ -72,6 +70,7 @@ public class XMLUtilTest {
                     <Total02Records>5</Total02Records>
                     <Total03Records>4</Total03Records>
                 </DocumentSummary>
-            </PacsTppSchedule>""";
+            </PacsTppSchedule>
+            """;
     }
 }

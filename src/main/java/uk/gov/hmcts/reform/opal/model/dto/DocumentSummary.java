@@ -8,7 +8,7 @@ import lombok.Data;
 @Data
 @XmlAccessorType(XmlAccessType.FIELD)
 public  class DocumentSummary {
-    @XmlElement(name = "SummaryAmount", namespace = "http://www.dwp.gsi.gov.uk/pacs")
+    @XmlElement(name = "SummaryAmountType", namespace = "http://www.dwp.gsi.gov.uk/pacs")
     private String summaryAmountType;
     @XmlElement(name = "SummaryAmountSign", namespace = "http://www.dwp.gsi.gov.uk/pacs")
     private String summaryAmountSign;

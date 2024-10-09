@@ -1,34 +1,31 @@
 package uk.gov.hmcts.reform.opal.service;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.opal.model.dto.OpalFile;
 import uk.gov.hmcts.reform.opal.scheduler.aspect.LogExecutionTime;
-import uk.gov.hmcts.reform.opal.sftp.SftpInboundService;
 import uk.gov.hmcts.reform.opal.transformer.AmalgamatedCTTransformer;
+import uk.gov.hmcts.reform.opal.transformer.DwpTransformer;
 
-import static uk.gov.hmcts.reform.opal.sftp.SftpLocation.DWP_BAILIFFS;
 import static uk.gov.hmcts.reform.opal.sftp.SftpLocation.DWP_BAILIFFS_ERROR;
 import static uk.gov.hmcts.reform.opal.sftp.SftpLocation.DWP_BAILIFFS_PROCESSING;
-import static uk.gov.hmcts.reform.opal.sftp.SftpLocation.DWP_BAILIFFS_SUCCESS;
 
 @Slf4j
 @Service
-public class DwpBailiffsService extends FileHandlingService {
+@RequiredArgsConstructor
+public class DwpBailiffsService {
 
-    public DwpBailiffsService(SftpInboundService sftpInboundService,
-                              AmalgamatedCTTransformer amalgamatedCTTransformer) {
-        super(sftpInboundService, amalgamatedCTTransformer);
-    }
+    private final FileHandlingService fileHandlingService;
+
+    private final AmalgamatedCTTransformer amalgamatedCTTransformer;
+
+    private final DwpTransformer dwpTransformer;
 
     @LogExecutionTime
     public void process() {
 
-        for (String fileName : sftpInboundService.listFiles(DWP_BAILIFFS.getPath())) {
-
-            //Move file to processing dir
-            sftpInboundService.moveFile(DWP_BAILIFFS.getPath(), fileName,
-                                        DWP_BAILIFFS_PROCESSING.getPath());
+        for (String fileName : fileHandlingService.getListOfFilesToProcess()) {
             //process single file
             processSingleFile(fileName);
         }
@@ -36,19 +33,23 @@ public class DwpBailiffsService extends FileHandlingService {
 
     void processSingleFile(String fileName) {
         try {
-            OpalFile file = createOpalFile(fileName, true, DWP_BAILIFFS_PROCESSING.getPath());
+            OpalFile file = fileHandlingService
+                .createOpalFile(fileName, true, DWP_BAILIFFS_PROCESSING.getPath());
 
-            outputFileSuccess(applyTransformations(file), DWP_BAILIFFS_SUCCESS.getPath());
+            fileHandlingService.outputFileSuccess(applyTransformations(file));
 
         } catch (Exception e) {
 
-            outputFileError(fileName,DWP_BAILIFFS_PROCESSING.getPath(), DWP_BAILIFFS_ERROR.getPath());
+            fileHandlingService
+                .outputFileError(fileName,DWP_BAILIFFS_PROCESSING.getPath(), DWP_BAILIFFS_ERROR.getPath());
         }
     }
 
     OpalFile applyTransformations(OpalFile file) {
 
-        amalgamatedCTTransformer.transformAmalgamatedCT(file, false);
+        file = dwpTransformer.dwpTransform(file);
+        file = amalgamatedCTTransformer.transformAmalgamatedCT(file, false);
+
         return file;
     }
 

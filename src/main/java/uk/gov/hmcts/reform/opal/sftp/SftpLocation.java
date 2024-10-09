@@ -30,8 +30,12 @@ public enum SftpLocation {
 
     DWP_BAILIFFS(INBOUND, "dwp-bailiffs", "Comes from BAIS (pulled)"),
     DWP_BAILIFFS_SUCCESS(INBOUND, "dwp-bailiffs/success", "Successfully processed for DWP bailiffs"),
-    DWP_BAILIFFS_PROCESSING(INBOUND, "dwp-bailiffs/processing", "In progress processing for DWP bailiffs"),
+    DWP_BAILIFFS_PROCESSING(
+        INBOUND, "dwp-bailiffs/processing", "In progress processing for DWP bailiffs"),
     DWP_BAILIFFS_ERROR(INBOUND, "dwp-bailiffs/error", "Error processing for DWP bailiffs"),
+    DWP_BAILIFFS_ARCHIVE(INBOUND,
+                         "dwp-bailiffs/archive",
+                         "Archive original file for successful transformations"),
 
     ALL_PAY(OUTBOUND, "allpay", "Goes to BAIS (pushed)"),
     ALL_PAY_ARCHIVE(OUTBOUND, "allpay-archive", "Goes to OAGS (pushed)"),

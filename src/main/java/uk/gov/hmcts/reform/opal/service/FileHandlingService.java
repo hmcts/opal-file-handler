@@ -2,22 +2,44 @@ package uk.gov.hmcts.reform.opal.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.opal.model.dto.DwpFile;
 import uk.gov.hmcts.reform.opal.model.dto.OpalFile;
 import uk.gov.hmcts.reform.opal.model.dto.StandardBankingFile;
 import uk.gov.hmcts.reform.opal.sftp.SftpInboundService;
-import uk.gov.hmcts.reform.opal.transformer.AmalgamatedCTTransformer;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
+
+import static uk.gov.hmcts.reform.opal.sftp.SftpLocation.DWP_BAILIFFS;
+import static uk.gov.hmcts.reform.opal.sftp.SftpLocation.DWP_BAILIFFS_ARCHIVE;
+import static uk.gov.hmcts.reform.opal.sftp.SftpLocation.DWP_BAILIFFS_PROCESSING;
+import static uk.gov.hmcts.reform.opal.sftp.SftpLocation.DWP_BAILIFFS_SUCCESS;
 
 @Slf4j
+@Service
 @RequiredArgsConstructor
 public class FileHandlingService {
 
     public final SftpInboundService sftpInboundService;
 
-    public final AmalgamatedCTTransformer amalgamatedCTTransformer;
+    public List<String> getListOfFilesToProcess() {
+        List<String> fileNames = new ArrayList<>();
+
+        for (String fileName : sftpInboundService.listFiles(DWP_BAILIFFS.getPath())) {
+
+            fileNames.add(fileName);
+            //Move file to processing dir
+            sftpInboundService.moveFile(DWP_BAILIFFS.getPath(), fileName,
+                                        DWP_BAILIFFS_PROCESSING.getPath()
+            );
+
+        }
+        return fileNames;
+    }
 
     public OpalFile createOpalFile(String fileName, boolean isDWPBailiffs, String path) {
 
@@ -25,7 +47,10 @@ public class FileHandlingService {
 
         try {
 
-            file.setFileContent(StandardBankingFile.toStandardBankingFile(readFileContents(file, path)));
+            file.setFileContent(isDWPBailiffs
+                                    ?
+                                    DwpFile.toDwpFile(readFileContents(file, path)) :
+                                    StandardBankingFile.toStandardBankingFile(readFileContents(file, path)));
 
         } catch (Exception e) {
             log.error("Error processing file", e);
@@ -57,14 +82,17 @@ public class FileHandlingService {
         return fileContentsBuilder.toString();
     }
 
-    public void outputFileSuccess(OpalFile file, String path) {
+    public void outputFileSuccess(OpalFile file) {
 
         //upload new file to success dir
-        sftpInboundService.uploadFile(file.getFileContent().toString().getBytes(StandardCharsets.UTF_8), path,
+        sftpInboundService.uploadFile(StandardBankingFile.toString((StandardBankingFile) file.getFileContent())
+                                          .getBytes(
+                                          StandardCharsets.UTF_8), DWP_BAILIFFS_SUCCESS.getPath(),
                                       file.getNewFileName());
 
-        //delete file from processing dir
-        sftpInboundService.deleteFile(path, file.getOriginalFileName());
+        //delete file from processing to archive
+        sftpInboundService.moveFile(DWP_BAILIFFS_PROCESSING.getPath(), file.getOriginalFileName(),
+                                    DWP_BAILIFFS_ARCHIVE.getPath());
     }
 
     public void outputFileError(String fileName, String oldPath, String newPath) {
@@ -73,4 +101,5 @@ public class FileHandlingService {
         sftpInboundService.moveFile(oldPath, fileName, newPath);
 
     }
+
 }

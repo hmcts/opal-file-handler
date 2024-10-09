@@ -24,7 +24,7 @@ public class DwpFile implements FileContent {
     @XmlElement(name = "DocumentSummary", namespace = "http://www.dwp.gsi.gov.uk/pacs")
     private DocumentSummary documentSummary;
 
-    public DwpFile toDwpFile(String fileContents) throws JAXBException {
+    public static DwpFile toDwpFile(String fileContents) throws JAXBException {
         return XMLUtil.unmarshal(fileContents, DwpFile.class);
     }
 }
