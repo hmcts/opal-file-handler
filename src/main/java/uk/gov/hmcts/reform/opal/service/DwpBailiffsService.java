@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.opal.model.dto.OpalFile;
 import uk.gov.hmcts.reform.opal.scheduler.aspect.LogExecutionTime;
 import uk.gov.hmcts.reform.opal.transformer.AmalgamatedCTTransformer;
+import uk.gov.hmcts.reform.opal.transformer.AntTransformer;
 import uk.gov.hmcts.reform.opal.transformer.DwpTransformer;
 
 import static uk.gov.hmcts.reform.opal.sftp.SftpLocation.DWP_BAILIFFS_ERROR;
@@ -22,12 +23,16 @@ public class DwpBailiffsService {
 
     private final DwpTransformer dwpTransformer;
 
+    private final AntTransformer antTransformer;
+
     @LogExecutionTime
     public void process() {
 
         for (String fileName : fileHandlingService.getListOfFilesToProcess()) {
+
             //process single file
             processSingleFile(fileName);
+
         }
     }
 
@@ -47,10 +52,8 @@ public class DwpBailiffsService {
 
     OpalFile applyTransformations(OpalFile file) {
 
-        file = dwpTransformer.dwpTransform(file);
-        file = amalgamatedCTTransformer.transformAmalgamatedCT(file, false);
-
-        return file;
+        return antTransformer.antTransform(
+            amalgamatedCTTransformer.transformAmalgamatedCT(
+                dwpTransformer.dwpTransform(file), false));
     }
-
 }

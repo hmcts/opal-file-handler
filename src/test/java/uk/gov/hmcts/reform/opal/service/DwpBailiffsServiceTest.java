@@ -8,6 +8,7 @@ import org.mockito.MockitoAnnotations;
 import uk.gov.hmcts.reform.opal.model.dto.OpalFile;
 import uk.gov.hmcts.reform.opal.sftp.SftpLocation;
 import uk.gov.hmcts.reform.opal.transformer.AmalgamatedCTTransformer;
+import uk.gov.hmcts.reform.opal.transformer.AntTransformer;
 import uk.gov.hmcts.reform.opal.transformer.DwpTransformer;
 
 import java.util.Arrays;
@@ -33,6 +34,9 @@ class DwpBailiffsServiceTest {
     @Mock
     private DwpTransformer dwpTransformer;
 
+    @Mock
+    private AntTransformer antTransformer;
+
     private final String processingPath = SftpLocation.DWP_BAILIFFS_PROCESSING.getPath();
     private final String errorPath = SftpLocation.DWP_BAILIFFS_ERROR.getPath();
 
@@ -53,6 +57,7 @@ class DwpBailiffsServiceTest {
         when(fileHandlingService.createOpalFile(eq(fileName2), eq(true), eq(processingPath))).thenReturn(opalFile);
         when(dwpTransformer.dwpTransform(opalFile)).thenReturn(opalFile);
         when(amalgamatedCTTransformer.transformAmalgamatedCT(opalFile, false)).thenReturn(opalFile);
+        when(antTransformer.antTransform(opalFile)).thenReturn(opalFile);
 
         // Act
         dwpBailiffsService.process();
@@ -81,6 +86,7 @@ class DwpBailiffsServiceTest {
         OpalFile opalFile = OpalFile.builder().build();
         when(dwpTransformer.dwpTransform(opalFile)).thenReturn(opalFile);
         when(amalgamatedCTTransformer.transformAmalgamatedCT(opalFile, false)).thenReturn(opalFile);
+        when(antTransformer.antTransform(opalFile)).thenReturn(opalFile);
 
         // Act
         OpalFile transformedFile = dwpBailiffsService.applyTransformations(opalFile);
@@ -89,5 +95,6 @@ class DwpBailiffsServiceTest {
         assertEquals(opalFile, transformedFile);
         verify(dwpTransformer).dwpTransform(opalFile);
         verify(amalgamatedCTTransformer).transformAmalgamatedCT(opalFile, false);
+        verify(antTransformer).antTransform(opalFile);
     }
 }
