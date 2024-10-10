@@ -12,9 +12,9 @@ import uk.gov.hmcts.reform.opal.model.dto.StandardBankingFile;
 import uk.gov.hmcts.reform.opal.model.entity.AntCtAmalgamatedEntity;
 import uk.gov.hmcts.reform.opal.model.entity.ChequeBankAmalgamatedEntity;
 import uk.gov.hmcts.reform.opal.model.entity.ChequeNumberAmalgamatedEntity;
-import uk.gov.hmcts.reform.opal.repository.AntCtAmalgamatedTemp;
-import uk.gov.hmcts.reform.opal.repository.ChequeBankAmalgamatedTemp;
-import uk.gov.hmcts.reform.opal.repository.ChequeNumberAmalgamatedTemp;
+import uk.gov.hmcts.reform.opal.repository.AntCtAmalgamatedRepository;
+import uk.gov.hmcts.reform.opal.repository.ChequeBankAmalgamatedRepository;
+import uk.gov.hmcts.reform.opal.repository.ChequeNumberAmalgamatedRepository;
 
 import java.util.Collections;
 
@@ -25,13 +25,13 @@ import static org.mockito.Mockito.when;
 class AmalgamatedCTTransformerTest {
 
     @Mock
-    private ChequeBankAmalgamatedTemp chequeBankAmalgamatedTemp;
+    private ChequeBankAmalgamatedRepository chequeBankAmalgamated;
 
     @Mock
-    private AntCtAmalgamatedTemp antCtAmalgamatedTemp;
+    private AntCtAmalgamatedRepository antCtAmalgamated;
 
     @Mock
-    private ChequeNumberAmalgamatedTemp chequeNumberAmalgamatedTemp;
+    private ChequeNumberAmalgamatedRepository chequeNumberAmalgamated;
 
     @InjectMocks
     private AmalgamatedCTTransformer amalgamatedCTTransformer;
@@ -51,10 +51,10 @@ class AmalgamatedCTTransformerTest {
 
         ChequeBankAmalgamatedEntity chequeEntity = new ChequeBankAmalgamatedEntity();
         chequeEntity.setMasterCt("456");
-        chequeEntity.setMasterBankAcc("newAcc");
+        chequeEntity.setMasterBankAccount("newAcc");
         chequeEntity.setMasterSortCode("newSort");
 
-        when(chequeBankAmalgamatedTemp.findByAmalgamatedCt_AmalgamatedCt("123")).thenReturn(chequeEntity);
+        when(chequeBankAmalgamated.findByAmalgamatedCt("123")).thenReturn(chequeEntity);
 
         OpalFile result = amalgamatedCTTransformer.transformAmalgamatedCT(file, true);
 
@@ -73,7 +73,7 @@ class AmalgamatedCTTransformerTest {
         cashEntity.setMasterBankAccount("newAcc");
         cashEntity.setMasterSortCode("newSort");
 
-        when(antCtAmalgamatedTemp.findByAmalgamatedCt("123")).thenReturn(cashEntity);
+        when(antCtAmalgamated.findByAmalgamatedCt("123")).thenReturn(cashEntity);
 
         OpalFile result = amalgamatedCTTransformer.transformAmalgamatedCT(file, false);
 
@@ -93,13 +93,13 @@ class AmalgamatedCTTransformerTest {
     void transformChequeTransaction_withValidChequeNumber_shouldUpdateReferenceNumber() {
 
         ChequeBankAmalgamatedEntity chequeEntity = new ChequeBankAmalgamatedEntity();
-        chequeEntity.setMasterBankAcc("newAcc");
+        chequeEntity.setMasterBankAccount("newAcc");
         chequeEntity.setMasterSortCode("newSort");
 
         ChequeNumberAmalgamatedEntity chequeNumberEntity = new ChequeNumberAmalgamatedEntity();
-        chequeNumberEntity.setNewChequeNo("654321");
+        chequeNumberEntity.setNewChequeNumber("654321");
 
-        when(chequeNumberAmalgamatedTemp.findByAmalgamatedCt_AmalgamatedCtAndOldChequeNo("123",
+        when(chequeNumberAmalgamated.findByAmalgamatedCtAndOldChequeNumber("123",
                                                                                          "123456"))
             .thenReturn(chequeNumberEntity);
         FinancialTransaction transaction = FinancialTransaction.builder().referenceNumber("1234567890").build();
@@ -115,10 +115,10 @@ class AmalgamatedCTTransformerTest {
     void transformChequeTransaction_withNullChequeNumber_shouldNotUpdateReferenceNumber() {
 
         ChequeBankAmalgamatedEntity chequeEntity = new ChequeBankAmalgamatedEntity();
-        chequeEntity.setMasterBankAcc("newAcc");
+        chequeEntity.setMasterBankAccount("newAcc");
         chequeEntity.setMasterSortCode("newSort");
 
-        when(chequeNumberAmalgamatedTemp.findByAmalgamatedCt_AmalgamatedCtAndOldChequeNo("123",
+        when(chequeNumberAmalgamated.findByAmalgamatedCtAndOldChequeNumber("123",
                                                                                          "123456"))
             .thenReturn(null);
 
