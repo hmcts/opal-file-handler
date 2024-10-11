@@ -8,9 +8,9 @@ import uk.gov.hmcts.reform.opal.model.dto.StandardBankingFile;
 import uk.gov.hmcts.reform.opal.model.entity.AntCtAmalgamatedEntity;
 import uk.gov.hmcts.reform.opal.model.entity.ChequeBankAmalgamatedEntity;
 import uk.gov.hmcts.reform.opal.model.entity.ChequeNumberAmalgamatedEntity;
-import uk.gov.hmcts.reform.opal.repository.AntCtAmalgamatedTemp;
-import uk.gov.hmcts.reform.opal.repository.ChequeBankAmalgamatedTemp;
-import uk.gov.hmcts.reform.opal.repository.ChequeNumberAmalgamatedTemp;
+import uk.gov.hmcts.reform.opal.repository.AntCtAmalgamatedRepository;
+import uk.gov.hmcts.reform.opal.repository.ChequeBankAmalgamatedRepository;
+import uk.gov.hmcts.reform.opal.repository.ChequeNumberAmalgamatedRepository;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -19,9 +19,9 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class AmalgamatedCTTransformer {
 
-    private final ChequeBankAmalgamatedTemp chequeBankAmalgamatedTemp;
-    private final AntCtAmalgamatedTemp antCtAmalgamatedTemp;
-    private final ChequeNumberAmalgamatedTemp chequeNumberAmalgamatedTemp;
+    private final ChequeBankAmalgamatedRepository chequeBankAmalgamated;
+    private final AntCtAmalgamatedRepository antCtAmalgamated;
+    private final ChequeNumberAmalgamatedRepository chequeNumberAmalgamated;
 
     public OpalFile transformAmalgamatedCT(OpalFile file, boolean isCheque) {
         if (!(file.getFileContent() instanceof StandardBankingFile)) {
@@ -44,11 +44,11 @@ public class AmalgamatedCTTransformer {
     }
 
     private ChequeBankAmalgamatedEntity getChequeAmalgamatedEntity(String fileName) {
-        return chequeBankAmalgamatedTemp.findByAmalgamatedCt_AmalgamatedCt(extractFileNameCT(fileName));
+        return chequeBankAmalgamated.findByAmalgamatedCt(extractFileNameCT(fileName));
     }
 
     private AntCtAmalgamatedEntity getCashAmalgamatedEntity(String fileName) {
-        return antCtAmalgamatedTemp.findByAmalgamatedCt(extractFileNameCT(fileName));
+        return antCtAmalgamated.findByAmalgamatedCt(extractFileNameCT(fileName));
     }
 
     private void applyChequeTransformations(OpalFile file, ChequeBankAmalgamatedEntity chequeEntity) {
@@ -67,8 +67,8 @@ public class AmalgamatedCTTransformer {
     public FinancialTransaction transformChequeTransaction(FinancialTransaction transaction, String newFileName,
                                                            ChequeBankAmalgamatedEntity chequeEntity) {
         // Update account and sort code
-        if (chequeEntity.getOldBankAcc() != null) {
-            transaction.setBranchAccountNumber(chequeEntity.getMasterBankAcc());
+        if (chequeEntity.getOldBankAccount() != null) {
+            transaction.setBranchAccountNumber(chequeEntity.getMasterBankAccount());
         }
         if (chequeEntity.getOldSortCode() != null) {
             transaction.setBranchSortCode(chequeEntity.getMasterSortCode());
@@ -76,14 +76,14 @@ public class AmalgamatedCTTransformer {
 
         // Update cheque number
         String existingChequeNumber = transaction.getReferenceNumber().substring(0, 6);
-        ChequeNumberAmalgamatedEntity chequeNumberEntity = chequeNumberAmalgamatedTemp
-            .findByAmalgamatedCt_AmalgamatedCtAndOldChequeNo(
+        ChequeNumberAmalgamatedEntity chequeNumberEntity = chequeNumberAmalgamated
+            .findByAmalgamatedCtAndOldChequeNumber(
             extractFileNameCT(newFileName), existingChequeNumber);
 
         if (chequeNumberEntity != null) {
             transaction.setReferenceNumber(transaction.getReferenceNumber().replace(existingChequeNumber,
                                                                                     chequeNumberEntity
-                                                                                        .getNewChequeNo()));
+                                                                                        .getNewChequeNumber()));
         }
 
         return transaction;
