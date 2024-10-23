@@ -1,11 +1,9 @@
 package uk.gov.hmcts.reform.opal.model;
 
-import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.opal.model.dto.StandardBankingFileName;
 
 import java.util.HashMap;
 
-@Component
 public class FileSequence {
 
     private HashMap<String, String> sequenceMap = new HashMap<>();
