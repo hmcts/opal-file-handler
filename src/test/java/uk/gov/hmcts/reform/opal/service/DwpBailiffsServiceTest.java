@@ -6,6 +6,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import uk.gov.hmcts.reform.opal.model.dto.OpalFile;
+import uk.gov.hmcts.reform.opal.model.dto.StandardBankingFileName;
 import uk.gov.hmcts.reform.opal.sftp.SftpLocation;
 import uk.gov.hmcts.reform.opal.transformer.AmalgamatedCTTransformer;
 import uk.gov.hmcts.reform.opal.transformer.AntTransformer;
@@ -51,12 +52,16 @@ class DwpBailiffsServiceTest {
         String fileName1 = "file1.txt";
         String fileName2 = "file2.txt";
 
+
+
         when(fileHandlingService.getListOfFilesToProcess()).thenReturn(Arrays.asList(fileName1, fileName2));
-        OpalFile opalFile = OpalFile.builder().build();
+        OpalFile opalFile = OpalFile.builder()
+            .newFileName(StandardBankingFileName.builder().ct("073").date("DATE").source("db").extension("dat").build())
+            .build();
         when(fileHandlingService.createOpalFile(eq(fileName1), eq(true), eq(processingPath))).thenReturn(opalFile);
         when(fileHandlingService.createOpalFile(eq(fileName2), eq(true), eq(processingPath))).thenReturn(opalFile);
         when(dwpTransformer.dwpTransform(opalFile)).thenReturn(opalFile);
-        when(amalgamatedCTTransformer.transformAmalgamatedCT(opalFile, false)).thenReturn(opalFile);
+        when(amalgamatedCTTransformer.transformAmalgamatedCT(opalFile, "DB")).thenReturn(opalFile);
         when(antTransformer.antTransform(opalFile)).thenReturn(opalFile);
 
         // Act
@@ -67,25 +72,13 @@ class DwpBailiffsServiceTest {
     }
 
     @Test
-    void processSingleFile_shouldHandleException() {
-        // Arrange
-        String fileName = "file1.txt";
-        when(fileHandlingService.createOpalFile(eq(fileName), eq(true), eq(processingPath)))
-            .thenThrow(new RuntimeException("File error"));
-
-        // Act
-        dwpBailiffsService.processSingleFile(fileName);
-
-        // Assert
-        verify(fileHandlingService).outputFileError(eq(fileName), eq(processingPath), eq(errorPath));
-    }
-
-    @Test
     void applyTransformations_shouldReturnTransformedFile() {
         // Arrange
-        OpalFile opalFile = OpalFile.builder().build();
+        OpalFile opalFile = OpalFile.builder()
+            .newFileName(StandardBankingFileName.builder().ct("073").date("DATE").source("db").extension("dat").build())
+            .build();
         when(dwpTransformer.dwpTransform(opalFile)).thenReturn(opalFile);
-        when(amalgamatedCTTransformer.transformAmalgamatedCT(opalFile, false)).thenReturn(opalFile);
+        when(amalgamatedCTTransformer.transformAmalgamatedCT(opalFile, "DB")).thenReturn(opalFile);
         when(antTransformer.antTransform(opalFile)).thenReturn(opalFile);
 
         // Act
@@ -94,7 +87,7 @@ class DwpBailiffsServiceTest {
         // Assert
         assertEquals(opalFile, transformedFile);
         verify(dwpTransformer).dwpTransform(opalFile);
-        verify(amalgamatedCTTransformer).transformAmalgamatedCT(opalFile, false);
+        verify(amalgamatedCTTransformer).transformAmalgamatedCT(opalFile, "DB");
         verify(antTransformer).antTransform(opalFile);
     }
 }

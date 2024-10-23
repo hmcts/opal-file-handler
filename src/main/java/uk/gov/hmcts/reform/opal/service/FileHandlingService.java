@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.opal.model.dto.DwpFile;
 import uk.gov.hmcts.reform.opal.model.dto.OpalFile;
 import uk.gov.hmcts.reform.opal.model.dto.StandardBankingFile;
+import uk.gov.hmcts.reform.opal.model.dto.StandardBankingFileName;
 import uk.gov.hmcts.reform.opal.sftp.SftpInboundService;
 
 import java.io.BufferedReader;
@@ -41,9 +42,10 @@ public class FileHandlingService {
         return fileNames;
     }
 
-    public OpalFile createOpalFile(String fileName, boolean isDWPBailiffs, String path) {
+    public OpalFile createOpalFile(String originalFileName,
+                                   boolean isDWPBailiffs, String path) {
 
-        OpalFile file = OpalFile.builder().originalFileName(fileName).newFileName(fileName).build();
+        OpalFile file = OpalFile.builder().originalFileName(originalFileName).build();
 
         try {
 
@@ -88,7 +90,7 @@ public class FileHandlingService {
         sftpInboundService.uploadFile(StandardBankingFile.toString((StandardBankingFile) file.getFileContent())
                                           .getBytes(
                                           StandardCharsets.UTF_8), DWP_BAILIFFS_SUCCESS.getPath(),
-                                      file.getNewFileName());
+                                      StandardBankingFileName.toString(file.getNewFileName()));
 
         //delete file from processing to archive
         sftpInboundService.moveFile(DWP_BAILIFFS_PROCESSING.getPath(), file.getOriginalFileName(),

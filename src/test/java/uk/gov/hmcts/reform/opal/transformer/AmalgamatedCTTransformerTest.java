@@ -9,29 +9,26 @@ import uk.gov.hmcts.reform.opal.model.dto.DwpFile;
 import uk.gov.hmcts.reform.opal.model.dto.FinancialTransaction;
 import uk.gov.hmcts.reform.opal.model.dto.OpalFile;
 import uk.gov.hmcts.reform.opal.model.dto.StandardBankingFile;
+import uk.gov.hmcts.reform.opal.model.dto.StandardBankingFileName;
 import uk.gov.hmcts.reform.opal.model.entity.AntCtAmalgamatedEntity;
-import uk.gov.hmcts.reform.opal.model.entity.ChequeBankAmalgamatedEntity;
-import uk.gov.hmcts.reform.opal.model.entity.ChequeNumberAmalgamatedEntity;
+import uk.gov.hmcts.reform.opal.model.entity.AntMccCtEntity;
 import uk.gov.hmcts.reform.opal.repository.AntCtAmalgamatedRepository;
-import uk.gov.hmcts.reform.opal.repository.ChequeBankAmalgamatedRepository;
-import uk.gov.hmcts.reform.opal.repository.ChequeNumberAmalgamatedRepository;
+import uk.gov.hmcts.reform.opal.repository.AntMccCtRepository;
 
 import java.util.Collections;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 class AmalgamatedCTTransformerTest {
 
     @Mock
-    private ChequeBankAmalgamatedRepository chequeBankAmalgamated;
-
-    @Mock
     private AntCtAmalgamatedRepository antCtAmalgamated;
 
     @Mock
-    private ChequeNumberAmalgamatedRepository chequeNumberAmalgamated;
+    private AntMccCtRepository antMccCtRepository;
 
     @InjectMocks
     private AmalgamatedCTTransformer amalgamatedCTTransformer;
@@ -42,42 +39,47 @@ class AmalgamatedCTTransformerTest {
     }
 
     @Test
-    void transformAmalgamatedCT_withCheque_shouldTransformFile() {
-        OpalFile file = OpalFile.builder().newFileName("file123").build();
+    void transformAmalgamatedCT_withCash_shouldTransformFile() {
+        OpalFile file = OpalFile.builder().newFileName(createDummyFileName()).build();
 
         file.setFileContent(StandardBankingFile.builder()
                                 .financialTransactions(Collections.singletonList(createDummyTransaction()))
                                         .build());
-
-        ChequeBankAmalgamatedEntity chequeEntity = new ChequeBankAmalgamatedEntity();
-        chequeEntity.setMasterCt("456");
-        chequeEntity.setMasterBankAccount("newAcc");
-        chequeEntity.setMasterSortCode("newSort");
-
-        when(chequeBankAmalgamated.findByAmalgamatedCt("123")).thenReturn(chequeEntity);
-
-        OpalFile result = amalgamatedCTTransformer.transformAmalgamatedCT(file, true);
-
-        assertEquals("file456", result.getNewFileName());
-    }
-
-    @Test
-    void transformAmalgamatedCT_withCash_shouldTransformFile() {
-        OpalFile file = OpalFile.builder().newFileName("file123").build();
-
-        file.setFileContent(StandardBankingFile.builder()
-                                .financialTransactions(Collections.singletonList(createDummyTransaction())).build());
 
         AntCtAmalgamatedEntity cashEntity = new AntCtAmalgamatedEntity();
         cashEntity.setMasterCt("456");
         cashEntity.setMasterBankAccount("newAcc");
         cashEntity.setMasterSortCode("newSort");
 
-        when(antCtAmalgamated.findByAmalgamatedCt("123")).thenReturn(cashEntity);
+        AntMccCtEntity antMccCtEntity = new AntMccCtEntity();
+        antMccCtEntity.setMccCt("12345678");
 
-        OpalFile result = amalgamatedCTTransformer.transformAmalgamatedCT(file, false);
+        when(antCtAmalgamated.findByAmalgamatedCt("123456")).thenReturn(cashEntity);
+        when(antMccCtRepository.findByBranchSortCodeAndBranchAccountNumber(any(), any())).thenReturn(antMccCtEntity);
 
-        assertEquals("file456", result.getNewFileName());
+        OpalFile result = amalgamatedCTTransformer.transformAmalgamatedCT(file, "DB");
+
+        assertEquals("a121_123456_DB_678.dat", StandardBankingFileName.toString(result.getNewFileName()));
+    }
+
+    @Test
+    void transformAmalgamatedCT_withoutCash_shouldNotTransformFile() {
+        OpalFile file = OpalFile.builder().newFileName(createDummyFileName()).build();
+
+        file.setFileContent(StandardBankingFile.builder()
+                                .financialTransactions(Collections.singletonList(createDummyTransaction()))
+                                .build());
+
+
+
+        AntMccCtEntity antMccCtEntity = new AntMccCtEntity();
+        antMccCtEntity.setMccCt("12345678");
+
+        when(antMccCtRepository.findByBranchSortCodeAndBranchAccountNumber(any(), any())).thenReturn(antMccCtEntity);
+
+        OpalFile result = amalgamatedCTTransformer.transformAmalgamatedCT(file, "DB");
+
+        assertEquals("a121_123456_DB_678.dat", StandardBankingFileName.toString(result.getNewFileName()));
     }
 
     @Test
@@ -86,49 +88,7 @@ class AmalgamatedCTTransformerTest {
         file.setFileContent(new DwpFile());
 
         assertThrows(IllegalArgumentException.class, () -> amalgamatedCTTransformer
-            .transformAmalgamatedCT(file, true));
-    }
-
-    @Test
-    void transformChequeTransaction_withValidChequeNumber_shouldUpdateReferenceNumber() {
-
-        ChequeBankAmalgamatedEntity chequeEntity = new ChequeBankAmalgamatedEntity();
-        chequeEntity.setMasterBankAccount("newAcc");
-        chequeEntity.setMasterSortCode("newSort");
-
-        ChequeNumberAmalgamatedEntity chequeNumberEntity = new ChequeNumberAmalgamatedEntity();
-        chequeNumberEntity.setNewChequeNumber("654321");
-
-        when(chequeNumberAmalgamated.findByAmalgamatedCtAndOldChequeNumber("123",
-                                                                                         "123456"))
-            .thenReturn(chequeNumberEntity);
-        FinancialTransaction transaction = FinancialTransaction.builder().referenceNumber("1234567890").build();
-
-        FinancialTransaction result = amalgamatedCTTransformer.transformChequeTransaction(transaction,
-                                                                                          "file123",
-                                                                                          chequeEntity);
-
-        assertEquals("6543217890", result.getReferenceNumber());
-    }
-
-    @Test
-    void transformChequeTransaction_withNullChequeNumber_shouldNotUpdateReferenceNumber() {
-
-        ChequeBankAmalgamatedEntity chequeEntity = new ChequeBankAmalgamatedEntity();
-        chequeEntity.setMasterBankAccount("newAcc");
-        chequeEntity.setMasterSortCode("newSort");
-
-        when(chequeNumberAmalgamated.findByAmalgamatedCtAndOldChequeNumber("123",
-                                                                                         "123456"))
-            .thenReturn(null);
-
-        FinancialTransaction transaction = FinancialTransaction.builder().referenceNumber("1234567890").build();
-
-        FinancialTransaction result = amalgamatedCTTransformer.transformChequeTransaction(transaction,
-                                                                                          "file123",
-                                                                                          chequeEntity);
-
-        assertEquals("1234567890", result.getReferenceNumber());
+            .transformAmalgamatedCT(file, "DB"));
     }
 
     private FinancialTransaction createDummyTransaction() {
@@ -144,6 +104,16 @@ class AmalgamatedCTTransformerTest {
             .originatorsNameOrDescription("12345678901234567890")
             .referenceNumber("12345678901234567890")
             .date("123456")
+            .build();
+    }
+
+    private StandardBankingFileName createDummyFileName() {
+        return StandardBankingFileName.builder()
+            .date("123456")
+            .source("123456")
+            .ct("123456")
+            .sequence("123456")
+            .extension("123456")
             .build();
     }
 }

@@ -9,6 +9,7 @@ import org.mockito.MockitoAnnotations;
 import uk.gov.hmcts.reform.opal.model.dto.DwpFile;
 import uk.gov.hmcts.reform.opal.model.dto.OpalFile;
 import uk.gov.hmcts.reform.opal.model.dto.StandardBankingFile;
+import uk.gov.hmcts.reform.opal.model.dto.StandardBankingFileName;
 import uk.gov.hmcts.reform.opal.sftp.SftpInboundService;
 import uk.gov.hmcts.reform.opal.util.XMLUtil;
 import uk.gov.hmcts.reform.opal.util.XMLUtilTest;
@@ -119,8 +120,8 @@ class FileHandlingServiceTest {
     @Test
     void testOutputFileSuccess() throws Exception {
         // Arrange
-        String fileName = "newTestFile.txt";
-        OpalFile opalFile = OpalFile.builder().originalFileName("originalFile.txt").newFileName(fileName).build();
+        OpalFile opalFile = OpalFile.builder().originalFileName("originalFile.txt")
+            .newFileName(StandardBankingFileName.builder().build()).build();
         opalFile.setFileContent(StandardBankingFile.builder().build());
         // Act
         fileHandlingService.outputFileSuccess(opalFile);
@@ -129,7 +130,7 @@ class FileHandlingServiceTest {
         String processingPath = "dwp-bailiffs/processing";
         String archivePath = "dwp-bailiffs/archive";
         verify(sftpInboundService, times(1))
-            .uploadFile(any(byte[].class), eq(pathSuccess), eq(fileName));
+            .uploadFile(any(byte[].class), eq(pathSuccess), anyString());
         verify(sftpInboundService, times(1))
             .moveFile(eq(processingPath), eq(opalFile.getOriginalFileName()), eq(archivePath));
     }

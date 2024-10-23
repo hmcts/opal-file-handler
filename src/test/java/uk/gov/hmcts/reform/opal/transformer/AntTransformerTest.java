@@ -46,7 +46,6 @@ public class AntTransformerTest {
             .financialTransactions(Arrays.asList(transaction1, transaction2))
             .build();
         OpalFile opalFile = OpalFile.builder().originalFileName("original.txt")
-            .newFileName("new.txt")
             .fileContent(fileContent)
             .build();
 
@@ -78,7 +77,6 @@ public class AntTransformerTest {
             .financialTransactions(Collections.singletonList(transaction))
             .build();
         OpalFile opalFile = OpalFile.builder().originalFileName("original.txt")
-            .newFileName("new.txt")
             .fileContent(fileContent)
             .build();
 
@@ -104,7 +102,6 @@ public class AntTransformerTest {
             .financialTransactions(Collections.singletonList(transaction))
             .build();
         OpalFile opalFile = OpalFile.builder().originalFileName("original.txt")
-            .newFileName("new.txt")
             .fileContent(fileContent)
             .build();
 

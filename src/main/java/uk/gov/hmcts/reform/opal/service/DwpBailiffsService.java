@@ -3,12 +3,14 @@ package uk.gov.hmcts.reform.opal.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.opal.model.FileSequence;
 import uk.gov.hmcts.reform.opal.model.dto.OpalFile;
 import uk.gov.hmcts.reform.opal.scheduler.aspect.LogExecutionTime;
 import uk.gov.hmcts.reform.opal.transformer.AmalgamatedCTTransformer;
 import uk.gov.hmcts.reform.opal.transformer.AntTransformer;
 import uk.gov.hmcts.reform.opal.transformer.DwpTransformer;
 
+import static uk.gov.hmcts.reform.opal.sftp.SftpLocation.DWP_BAILIFFS;
 import static uk.gov.hmcts.reform.opal.sftp.SftpLocation.DWP_BAILIFFS_ERROR;
 import static uk.gov.hmcts.reform.opal.sftp.SftpLocation.DWP_BAILIFFS_PROCESSING;
 
@@ -28,25 +30,28 @@ public class DwpBailiffsService {
     @LogExecutionTime
     public void process() {
 
-        for (String fileName : fileHandlingService.getListOfFilesToProcess()) {
+        FileSequence sequence = new FileSequence();
 
-            //process single file
-            processSingleFile(fileName);
+        for (String originalFileName : fileHandlingService.getListOfFilesToProcess()) {
 
-        }
-    }
+            try {
 
-    void processSingleFile(String fileName) {
-        try {
-            OpalFile file = fileHandlingService
-                .createOpalFile(fileName, true, DWP_BAILIFFS_PROCESSING.getPath());
+                OpalFile file = fileHandlingService
+                    .createOpalFile(originalFileName, true,
+                                    DWP_BAILIFFS_PROCESSING.getPath());
 
-            fileHandlingService.outputFileSuccess(applyTransformations(file));
 
-        } catch (Exception e) {
+                file = applyTransformations(file);
+                file.getNewFileName().setSequence(sequence.getAndIncrementSequence(file.getNewFileName()));
 
-            fileHandlingService
-                .outputFileError(fileName,DWP_BAILIFFS_PROCESSING.getPath(), DWP_BAILIFFS_ERROR.getPath());
+                fileHandlingService.outputFileSuccess(file);
+
+            } catch (Exception e) {
+
+                fileHandlingService
+                    .outputFileError(originalFileName, DWP_BAILIFFS_PROCESSING.getPath(), DWP_BAILIFFS_ERROR.getPath());
+            }
+
         }
     }
 
@@ -54,6 +59,6 @@ public class DwpBailiffsService {
 
         return antTransformer.antTransform(
             amalgamatedCTTransformer.transformAmalgamatedCT(
-                dwpTransformer.dwpTransform(file), false));
+                dwpTransformer.dwpTransform(file), DWP_BAILIFFS.getSource()));
     }
 }
