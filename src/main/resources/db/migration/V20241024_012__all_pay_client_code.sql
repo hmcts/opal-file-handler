@@ -19,4 +19,4 @@ CREATE TABLE all_pay_client_code
 ,all_pay_client_code    varchar(4)    not null
 );
 
-CREATE UNIQUE INDEX of_business_unit_id_idx ON all_pay_client_code (business_unit_id);
+CREATE PRIMARY KEY all_pay_client_code_pk ON all_pay_client_code (business_unit_id);
