@@ -15,8 +15,10 @@
 **/
 CREATE TABLE all_pay_client_code
 (
- business_unit_id   varchar(4)    not null
+business_unit_id   varchar(4)    not null
 ,all_pay_client_code    varchar(4)    not null
+,CONSTRAINT all_pay_client_code_pk PRIMARY KEY
+(
+   business_unit_id
+)
 );
-
-CREATE PRIMARY KEY all_pay_client_code_pk ON all_pay_client_code (business_unit_id);
