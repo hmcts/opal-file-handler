@@ -8,7 +8,7 @@ import lombok.Data;
 public class OpalFile {
 
     private String originalFileName;
-    private StandardBankingFileName newFileName;
+    private FileName newFileName;
     private FileContent fileContent;
 
 }

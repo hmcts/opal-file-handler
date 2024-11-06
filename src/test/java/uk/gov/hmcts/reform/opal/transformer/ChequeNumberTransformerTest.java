@@ -65,7 +65,8 @@ class ChequeNumberTransformerTest {
 
         OpalFile result = chequeNumberTransformer.transformAmalgamatedCT(file);
 
-        assertEquals("bacs_678_1.dat", StandardBankingFileName.toString(result.getNewFileName()));
+        assertEquals("bacs_678_1.dat",
+                     StandardBankingFileName.toString((StandardBankingFileName) result.getNewFileName()));
     }
 
     @Test
@@ -91,7 +92,8 @@ class ChequeNumberTransformerTest {
 
         OpalFile result = chequeNumberTransformer.transformAmalgamatedCT(file);
 
-        assertEquals("bacs_ct1_1.dat", StandardBankingFileName.toString(result.getNewFileName()));
+        assertEquals("bacs_ct1_1.dat", StandardBankingFileName.toString(
+            (StandardBankingFileName) result.getNewFileName()));
     }
 
 

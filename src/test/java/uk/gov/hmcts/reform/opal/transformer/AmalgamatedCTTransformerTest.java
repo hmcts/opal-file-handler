@@ -59,7 +59,8 @@ class AmalgamatedCTTransformerTest {
 
         OpalFile result = amalgamatedCTTransformer.transformAmalgamatedCT(file, "DB");
 
-        assertEquals("a121_123456_DB_678.dat", StandardBankingFileName.toString(result.getNewFileName()));
+        assertEquals("a121_123456_DB_678.dat", StandardBankingFileName.toString(
+            (StandardBankingFileName) result.getNewFileName()));
     }
 
     @Test
@@ -79,7 +80,8 @@ class AmalgamatedCTTransformerTest {
 
         OpalFile result = amalgamatedCTTransformer.transformAmalgamatedCT(file, "DB");
 
-        assertEquals("a121_123456_DB_678.dat", StandardBankingFileName.toString(result.getNewFileName()));
+        assertEquals("a121_123456_DB_678.dat", StandardBankingFileName.toString(
+            (StandardBankingFileName) result.getNewFileName()));
     }
 
     @Test

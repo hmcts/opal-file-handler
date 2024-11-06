@@ -29,14 +29,18 @@ public class ChequeNumberTransformer {
         }
         ChequeBankAmalgamatedEntity chequeEntity =
             getChequeAmalgamatedEntity(extractFileNameCT(file.getOriginalFileName()));
+
         if (chequeEntity != null) {
+
             file.setFileContent(applyChequeTransformations(file, chequeEntity));
+
             file.setNewFileName(createChequeFilename(
                 ((StandardBankingFile) file.getFileContent()).getFinancialTransactions().getFirst()
                     .getBranchAccountNumber(),
                 ((StandardBankingFile) file.getFileContent())
                     .getFinancialTransactions().getFirst().getBranchSortCode()));
         } else {
+            //TODO: change extract to db call for ct
             file.setNewFileName(createChequeFilename(extractFileNameCT(file.getOriginalFileName())));
         }
         return file;
@@ -83,6 +87,7 @@ public class ChequeNumberTransformer {
             .prefix("bacs")
             .ct(antMccCtRepository.findByBranchSortCodeAndBranchAccountNumber(sortCode, bankAccount)
                     .getMccCt().substring(5))
+            //TODO: sequence from db
             .sequence("1")
             .extension("dat")
             .build();
@@ -92,6 +97,7 @@ public class ChequeNumberTransformer {
         return StandardBankingFileName.builder()
             .prefix("bacs")
             .ct(ct)
+            //TODO: sequence from db
             .sequence("1")
             .extension("dat")
             .build();
