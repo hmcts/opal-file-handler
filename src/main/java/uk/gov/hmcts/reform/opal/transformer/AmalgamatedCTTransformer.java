@@ -24,7 +24,7 @@ public class AmalgamatedCTTransformer {
         if (!(file.getFileContent() instanceof StandardBankingFile)) {
             throw new IllegalArgumentException("Unsupported file content type");
         }
-        AntCtAmalgamatedEntity cashEntity = getCashAmalgamatedEntity(file.getNewFileName());
+        AntCtAmalgamatedEntity cashEntity = getCashAmalgamatedEntity((StandardBankingFileName) file.getNewFileName());
         if (cashEntity != null) {
             applyCashTransformations(file, cashEntity);
         }
@@ -46,7 +46,7 @@ public class AmalgamatedCTTransformer {
 
     private void applyCashTransformations(OpalFile file, AntCtAmalgamatedEntity cashEntity) {
         // Update file name
-        file.getNewFileName().setCt(cashEntity.getMasterCt());
+        ((StandardBankingFileName)file.getNewFileName()).setCt(cashEntity.getMasterCt());
 
         // Process transactions
         StandardBankingFile bankingFile = (StandardBankingFile) file.getFileContent();

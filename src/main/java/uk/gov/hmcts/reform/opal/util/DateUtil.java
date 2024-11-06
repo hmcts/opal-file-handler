@@ -18,4 +18,12 @@ public class DateUtil {
         // Format the Julian date as YYDDD
         return String.format("%s%03d", year, dayOfYear);
     }
+
+    public static String flipDate(String date) {
+        // Parse the input date in the format DDMMYYYY
+        LocalDate localDate = LocalDate.parse(date, DateTimeFormatter.ofPattern("ddMMyyyy"));
+
+        // Format the date as YYYYMMDD
+        return localDate.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+    }
 }

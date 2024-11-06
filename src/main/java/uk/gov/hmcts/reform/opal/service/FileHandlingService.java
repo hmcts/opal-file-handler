@@ -90,7 +90,8 @@ public class FileHandlingService {
         sftpInboundService.uploadFile(StandardBankingFile.toString((StandardBankingFile) file.getFileContent())
                                           .getBytes(
                                           StandardCharsets.UTF_8), DWP_BAILIFFS_SUCCESS.getPath(),
-                                      StandardBankingFileName.toString(file.getNewFileName()));
+                                      StandardBankingFileName
+                                          .toString((StandardBankingFileName) file.getNewFileName()));
 
         //delete file from processing to archive
         sftpInboundService.moveFile(DWP_BAILIFFS_PROCESSING.getPath(), file.getOriginalFileName(),

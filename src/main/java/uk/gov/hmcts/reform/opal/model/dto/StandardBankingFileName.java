@@ -8,7 +8,7 @@ import java.util.stream.Stream;
 
 @Data
 @Builder
-public class StandardBankingFileName {
+public class StandardBankingFileName implements FileName {
     //{prefix}_{date}_{source}_{ct}_{sequence}.{extension}
 
     private String prefix;
@@ -19,11 +19,13 @@ public class StandardBankingFileName {
     private String extension;
 
 
-    public static String toString(StandardBankingFileName fileName) {
-        return Stream.of(fileName.prefix, fileName.date, fileName.source, fileName.ct, fileName.sequence)
+    public static String toString(StandardBankingFileName standardBankingFileName) {
+
+        return Stream.of(standardBankingFileName.prefix, standardBankingFileName.date,
+                         standardBankingFileName.source, standardBankingFileName.ct, standardBankingFileName.sequence)
             .filter(Objects::nonNull) // Exclude null values
             .reduce((a, b) -> a + "_" + b) // Join with underscore
-            .orElse("") + "." + fileName.extension; // Append the extension
+            .orElse("") + "." + standardBankingFileName.extension; // Append the extension
     }
 
 

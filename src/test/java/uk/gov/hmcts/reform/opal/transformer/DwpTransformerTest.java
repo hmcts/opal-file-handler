@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.opal.model.entity.AntMccCtEntity;
 import uk.gov.hmcts.reform.opal.repository.AntCtBankAccountRepository;
 import uk.gov.hmcts.reform.opal.repository.AntMccCtRepository;
 
+import java.util.Arrays;
 import java.util.Collections;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -64,7 +65,40 @@ class DwpTransformerTest {
 
         OpalFile result = dwpTransformer.dwpTransform(opalFile);
 
-        assertEquals("a121_2023-12-02_DB_678.dat", StandardBankingFileName.toString(result.getNewFileName()));
+        assertEquals("a121_2023-12-02_DB_678.dat", StandardBankingFileName.toString(
+            (StandardBankingFileName) result.getNewFileName()));
+        assertEquals(1, ((StandardBankingFile) result.getFileContent()).getFinancialTransactions().size());
+    }
+
+    @Test
+    void dwpTransform_withValidDwpFile_shouldTransformFile_ExcludeNonPlus() {
+        DwpFile dwpFile = new DwpFile();
+        DocumentHeader documentHeader = new DocumentHeader();
+        documentHeader.setPacsDocumentCreationDate("2023-12-02");
+        dwpFile.setDocumentHeader(documentHeader);
+        dwpFile.setDocumentDetails(Arrays.asList(createDummyDocumentDetail("+",
+                                                                           "PAYMENT"),
+                                                 createDummyDocumentDetail("-",
+                                                                           "PAYMENT")));
+        OpalFile opalFile = OpalFile.builder()
+            .originalFileName("0000031714_dat_0000000005_20231202_105959.txt")
+            .newFileName(StandardBankingFileName.builder().prefix("a121").ct("073").date("DATE").source("db")
+                             .extension("dat").build())
+            .fileContent(dwpFile).build();
+
+        AntCtBankAccountEntity antCtBankAccountEntity = new AntCtBankAccountEntity();
+        AntMccCtEntity antMccCtEntity = new AntMccCtEntity();
+        antMccCtEntity.setMccCt("12345678");
+
+        when(antCtBankAccountRepository
+                 .findByDwpCourtCode(opalFile.getOriginalFileName().substring(0, 10)))
+            .thenReturn(antCtBankAccountEntity);
+        when(antMccCtRepository.findByCt(any())).thenReturn(antMccCtEntity);
+
+        OpalFile result = dwpTransformer.dwpTransform(opalFile);
+
+        assertEquals("a121_2023-12-02_DB_678.dat", StandardBankingFileName.toString(
+            (StandardBankingFileName) result.getNewFileName()));
         assertEquals(1, ((StandardBankingFile) result.getFileContent()).getFinancialTransactions().size());
     }
 
