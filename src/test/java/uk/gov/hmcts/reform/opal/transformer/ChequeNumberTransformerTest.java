@@ -5,9 +5,9 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import uk.gov.hmcts.reform.opal.model.dto.DwpFile;
 import uk.gov.hmcts.reform.opal.model.dto.FinancialTransaction;
 import uk.gov.hmcts.reform.opal.model.dto.OpalFile;
+import uk.gov.hmcts.reform.opal.model.dto.DwpFile;
 import uk.gov.hmcts.reform.opal.model.dto.StandardBankingFile;
 import uk.gov.hmcts.reform.opal.model.dto.StandardBankingFileName;
 import uk.gov.hmcts.reform.opal.model.entity.AntMccCtEntity;
@@ -16,12 +16,14 @@ import uk.gov.hmcts.reform.opal.model.entity.ChequeNumberAmalgamatedEntity;
 import uk.gov.hmcts.reform.opal.repository.AntMccCtRepository;
 import uk.gov.hmcts.reform.opal.repository.ChequeBankAmalgamatedRepository;
 import uk.gov.hmcts.reform.opal.repository.ChequeNumberAmalgamatedRepository;
+import uk.gov.hmcts.reform.opal.service.ChequeFileSequenceService;
 
 import java.util.Collections;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 class ChequeNumberTransformerTest {
@@ -34,6 +36,9 @@ class ChequeNumberTransformerTest {
 
     @Mock
     private  ChequeBankAmalgamatedRepository chequeBankAmalgamated;
+
+    @Mock
+    private ChequeFileSequenceService sequenceService;
 
     @InjectMocks
     private ChequeNumberTransformer chequeNumberTransformer;
@@ -61,7 +66,9 @@ class ChequeNumberTransformerTest {
 
         when(antMccCtRepository.findByBranchSortCodeAndBranchAccountNumber(any(), any())).thenReturn(antMccCtEntity);
 
-        when(chequeBankAmalgamated.findByAmalgamatedCt("ct1")).thenReturn(chequeEntity);
+        when(chequeBankAmalgamated.findByAmalgamatedCt("678")).thenReturn(chequeEntity);
+
+        when(sequenceService.getNextSequenceValue()).thenReturn(1L);
 
         OpalFile result = chequeNumberTransformer.transformAmalgamatedCT(file);
 
@@ -83,16 +90,23 @@ class ChequeNumberTransformerTest {
     void transformAmalgamatedCT_withCheque_notAmalgamated() {
         OpalFile file = OpalFile.builder().originalFileName("filect1").build();
 
+        AntMccCtEntity antMccCtEntity = new AntMccCtEntity();
+        antMccCtEntity.setMccCt("12345678");
+
         file.setFileContent(StandardBankingFile.builder()
                                 .financialTransactions(Collections.singletonList(createDummyTransaction()))
                                 .build());
 
 
         when(chequeBankAmalgamated.findByAmalgamatedCt("ct1")).thenReturn(null);
+        when(antMccCtRepository
+                 .findByBranchSortCodeAndBranchAccountNumber(anyString(),
+                                                             anyString())).thenReturn(antMccCtEntity);
+        when(sequenceService.getNextSequenceValue()).thenReturn(1L);
 
         OpalFile result = chequeNumberTransformer.transformAmalgamatedCT(file);
 
-        assertEquals("bacs_ct1_1.dat", StandardBankingFileName.toString(
+        assertEquals("bacs_678_1.dat", StandardBankingFileName.toString(
             (StandardBankingFileName) result.getNewFileName()));
     }
 
@@ -116,6 +130,8 @@ class ChequeNumberTransformerTest {
             .thenReturn(chequeNumberEntity);
 
         when(antMccCtRepository.findByBranchSortCodeAndBranchAccountNumber(any(), any())).thenReturn(antMccCtEntity);
+
+        when(sequenceService.getNextSequenceValue()).thenReturn(1L);
 
         FinancialTransaction transaction = FinancialTransaction.builder().referenceNumber("1234567890").build();
 
@@ -142,6 +158,8 @@ class ChequeNumberTransformerTest {
             .thenReturn(chequeNumberEntity);
 
         when(antMccCtRepository.findByBranchSortCodeAndBranchAccountNumber(any(), any())).thenReturn(antMccCtEntity);
+
+        when(sequenceService.getNextSequenceValue()).thenReturn(1L);
 
         FinancialTransaction transaction = FinancialTransaction.builder()
             .branchSortCode("112233").branchAccountNumber("12345678").referenceNumber("1234567890").build();
@@ -176,6 +194,8 @@ class ChequeNumberTransformerTest {
 
         FinancialTransaction result = chequeNumberTransformer.transformChequeTransaction(transaction,
                                                                                           chequeEntity);
+
+        when(sequenceService.getNextSequenceValue()).thenReturn(1L);
 
         assertEquals("1234567890", result.getReferenceNumber());
         assertEquals("newAcc", result.getBranchAccountNumber());

@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.opal.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.opal.model.FileSequence;
 import uk.gov.hmcts.reform.opal.model.dto.OpalFile;
 import uk.gov.hmcts.reform.opal.model.dto.StandardBankingFileName;
 import uk.gov.hmcts.reform.opal.scheduler.aspect.LogExecutionTime;
@@ -31,7 +30,7 @@ public class DwpBailiffsService {
     @LogExecutionTime
     public void process() {
 
-        FileSequence sequence = new FileSequence();
+        CashFileSequenceService sequence = new CashFileSequenceService();
 
         for (String originalFileName : fileHandlingService.getListOfFilesToProcess()) {
 

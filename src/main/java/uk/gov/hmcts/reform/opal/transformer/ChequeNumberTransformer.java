@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.opal.model.entity.ChequeNumberAmalgamatedEntity;
 import uk.gov.hmcts.reform.opal.repository.AntMccCtRepository;
 import uk.gov.hmcts.reform.opal.repository.ChequeBankAmalgamatedRepository;
 import uk.gov.hmcts.reform.opal.repository.ChequeNumberAmalgamatedRepository;
+import uk.gov.hmcts.reform.opal.service.ChequeFileSequenceService;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -22,27 +23,27 @@ public class ChequeNumberTransformer {
     private final ChequeBankAmalgamatedRepository chequeBankAmalgamated;
     private final ChequeNumberAmalgamatedRepository chequeNumberAmalgamated;
     private final AntMccCtRepository antMccCtRepository;
+    private final ChequeFileSequenceService sequenceService;
 
     public OpalFile transformAmalgamatedCT(OpalFile file) {
         if (!(file.getFileContent() instanceof StandardBankingFile)) {
             throw new IllegalArgumentException("Unsupported file content type");
         }
+
+        file.setNewFileName(createChequeFilename(
+            ((StandardBankingFile) file.getFileContent()).getFinancialTransactions().getFirst()
+                .getBranchAccountNumber(),
+            ((StandardBankingFile) file.getFileContent())
+                .getFinancialTransactions().getFirst().getBranchSortCode()));
+
         ChequeBankAmalgamatedEntity chequeEntity =
-            getChequeAmalgamatedEntity(extractFileNameCT(file.getOriginalFileName()));
+            getChequeAmalgamatedEntity(((StandardBankingFileName)file.getNewFileName()).getCt());
 
         if (chequeEntity != null) {
 
             file.setFileContent(applyChequeTransformations(file, chequeEntity));
-
-            file.setNewFileName(createChequeFilename(
-                ((StandardBankingFile) file.getFileContent()).getFinancialTransactions().getFirst()
-                    .getBranchAccountNumber(),
-                ((StandardBankingFile) file.getFileContent())
-                    .getFinancialTransactions().getFirst().getBranchSortCode()));
-        } else {
-            //TODO: change extract to db call for ct
-            file.setNewFileName(createChequeFilename(extractFileNameCT(file.getOriginalFileName())));
         }
+
         return file;
     }
 
@@ -87,23 +88,8 @@ public class ChequeNumberTransformer {
             .prefix("bacs")
             .ct(antMccCtRepository.findByBranchSortCodeAndBranchAccountNumber(sortCode, bankAccount)
                     .getMccCt().substring(5))
-            //TODO: sequence from db
-            .sequence("1")
+            .sequence(sequenceService.getNextSequenceValue().toString())
             .extension("dat")
             .build();
-    }
-
-    private StandardBankingFileName createChequeFilename(String ct) {
-        return StandardBankingFileName.builder()
-            .prefix("bacs")
-            .ct(ct)
-            //TODO: sequence from db
-            .sequence("1")
-            .extension("dat")
-            .build();
-    }
-
-    private String extractFileNameCT(String fileName) {
-        return fileName.substring(fileName.length() - 3);
     }
 }
