@@ -1,16 +1,22 @@
 package uk.gov.hmcts.reform.opal.model;
 
+import uk.gov.hmcts.reform.opal.model.dto.FileName;
 import uk.gov.hmcts.reform.opal.model.dto.StandardBankingFileName;
 
 import java.util.HashMap;
 
-public class FileSequence {
+public class CashFileSequence {
 
     private HashMap<String, String> sequenceMap = new HashMap<>();
 
-    public String getAndIncrementSequence(StandardBankingFileName fileName) {
+    public String getAndIncrementSequence(FileName fileName) {
 
-        String key = fileName.getDate() + fileName.getSource() + fileName.getCt();
+        if (!(fileName instanceof StandardBankingFileName standardBankingFileName)) {
+            throw new IllegalArgumentException("Invalid file name type");
+        }
+        String key = standardBankingFileName.getDate()
+            + standardBankingFileName.getSource()
+            + standardBankingFileName.getCt();
 
         if (sequenceMap.containsKey(key)) {
 
@@ -22,5 +28,4 @@ public class FileSequence {
         }
 
     }
-
 }

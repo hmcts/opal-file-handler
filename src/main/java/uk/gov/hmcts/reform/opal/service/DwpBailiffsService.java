@@ -3,8 +3,9 @@ package uk.gov.hmcts.reform.opal.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.opal.model.FileSequence;
+import uk.gov.hmcts.reform.opal.model.CashFileSequence;
 import uk.gov.hmcts.reform.opal.model.dto.OpalFile;
+import uk.gov.hmcts.reform.opal.model.dto.StandardBankingFileName;
 import uk.gov.hmcts.reform.opal.scheduler.aspect.LogExecutionTime;
 import uk.gov.hmcts.reform.opal.transformer.AmalgamatedCTTransformer;
 import uk.gov.hmcts.reform.opal.transformer.AntTransformer;
@@ -30,7 +31,7 @@ public class DwpBailiffsService {
     @LogExecutionTime
     public void process() {
 
-        FileSequence sequence = new FileSequence();
+        CashFileSequence sequence = new CashFileSequence();
 
         for (String originalFileName : fileHandlingService.getListOfFilesToProcess()) {
 
@@ -42,7 +43,8 @@ public class DwpBailiffsService {
 
 
                 file = applyTransformations(file);
-                file.getNewFileName().setSequence(sequence.getAndIncrementSequence(file.getNewFileName()));
+                file.getNewFileName()
+                    .setSequence(sequence.getAndIncrementSequence((StandardBankingFileName) file.getNewFileName()));
 
                 fileHandlingService.outputFileSuccess(file);
 
