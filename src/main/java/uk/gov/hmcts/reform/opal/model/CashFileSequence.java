@@ -1,11 +1,11 @@
-package uk.gov.hmcts.reform.opal.service;
+package uk.gov.hmcts.reform.opal.model;
 
 import uk.gov.hmcts.reform.opal.model.dto.FileName;
 import uk.gov.hmcts.reform.opal.model.dto.StandardBankingFileName;
 
 import java.util.HashMap;
 
-public class CashFileSequenceService {
+public class CashFileSequence {
 
     private HashMap<String, String> sequenceMap = new HashMap<>();
 
