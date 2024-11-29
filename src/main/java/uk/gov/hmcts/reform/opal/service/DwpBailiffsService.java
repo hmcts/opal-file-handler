@@ -37,6 +37,8 @@ public class DwpBailiffsService {
 
             try {
 
+                log.debug ("Processing file: {}", originalFileName);
+
                 OpalFile file = fileHandlingService
                     .createOpalFile(originalFileName, true,
                                     DWP_BAILIFFS_PROCESSING.getPath());
@@ -49,7 +51,7 @@ public class DwpBailiffsService {
                 fileHandlingService.outputFileSuccess(file);
 
             } catch (Exception e) {
-
+                log.error("Error processing file: {}", originalFileName, e);
                 fileHandlingService
                     .outputFileError(originalFileName, DWP_BAILIFFS_PROCESSING.getPath(), DWP_BAILIFFS_ERROR.getPath());
             }
