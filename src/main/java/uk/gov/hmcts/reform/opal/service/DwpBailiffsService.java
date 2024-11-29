@@ -37,7 +37,7 @@ public class DwpBailiffsService {
 
             try {
 
-                log.debug ("Processing file: {}", originalFileName);
+                log.debug("Processing file: {}", originalFileName);
 
                 OpalFile file = fileHandlingService
                     .createOpalFile(originalFileName, true,
