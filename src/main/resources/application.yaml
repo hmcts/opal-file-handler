@@ -30,7 +30,7 @@ spring:
       write_dates_as_timestamps: false
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://${OPAL_FILE_DB_HOST:localhost}:${OPAL_FILE_DB_PORT:5432}/${OPAL_FILE_DB_NAME:opal-file-db}${OPAL_USER_DB_OPTIONS:}
+    url: jdbc:postgresql://${OPAL_FILE_DB_HOST:localhost}:${OPAL_FILE_DB_PORT:5434}/${OPAL_FILE_DB_NAME:opal-file-db}${OPAL_USER_DB_OPTIONS:}
     username: ${OPAL_FILE_DB_USERNAME:opal-file}
     password: ${OPAL_FILE_DB_PASSWORD:opal-file}
     properties:
@@ -104,7 +104,7 @@ opal:
       cron: ${OPAL_AUTO_CASH_JOB_CRON:0 0 0 * * ?}
       file-name: ${OPAL_AUTO_CASH_JOB_FILE_NAME:test.txt}
     dwp-bailiffs-job:
-      cron: ${OPAL_DWP_BAILIFFS_JOB_CRON:0 50 * * * ?}
+      cron: ${OPAL_DWP_BAILIFFS_JOB_CRON:0 0 0 * * ?}
       file-name: ${OPAL_DWP_BAILIFFS_JOB_FILE_NAME:test.txt}
     all-pay-archive-job:
       cron: ${OPAL_ALL_PAY_ARCHIVE_JOB_CRON:0 0 0 * * ?}

@@ -20,7 +20,7 @@ public class AntCtAmalgamatedEntity {
     String amalgamatedCt;
     @Column(name = "master_ct", length = 3, nullable = false)
     String masterCt;
-    @Column(name = "MASTER_BANK_ACC")
+    @Column(name = "MASTER_BANK_ACCOUNT")
     String masterBankAccount;
     @Column(name = "MASTER_SORT_CODE")
     String masterSortCode;
