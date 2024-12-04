@@ -81,6 +81,8 @@ quartzProperties:
       threadCount: 8
 
 opal:
+  testing-support-endpoints:
+    enabled: ${OPAL_TESTING_SUPPORT_ENDPOINTS_ENABLED:true}
   sftp:
     inbound:
       host: ${OPAL_SFTP_INBOUND_HOST:localhost}
