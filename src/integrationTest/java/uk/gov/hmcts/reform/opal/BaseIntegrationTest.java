@@ -1,15 +1,20 @@
 package uk.gov.hmcts.reform.opal;
 
+import org.flywaydb.core.Flyway;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import uk.gov.hmcts.reform.opal.scheduler.config.CronJobConfiguration;
 import uk.gov.hmcts.reform.opal.scheduler.config.QuartzConfiguration;
 import uk.gov.hmcts.reform.opal.service.JobService;
+
+import javax.sql.DataSource;
 
 @Testcontainers
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -24,7 +29,23 @@ public class BaseIntegrationTest {
     @MockBean
     JobService jobService;
 
-    @ServiceConnection
-    @Container
-    static PostgreSQLContainer databaseContainer = new PostgreSQLContainer<>("postgres:15-alpine");
+    @DynamicPropertySource
+    static void databaseProperties(DynamicPropertyRegistry registry) {
+        PostgreSQLContainer<?> postgresContainer = SingletonPostgreSQLContainer.getInstance();
+        registry.add("spring.datasource.url", postgresContainer::getJdbcUrl);
+        registry.add("spring.datasource.username", postgresContainer::getUsername);
+        registry.add("spring.datasource.password", postgresContainer::getPassword);
+    }
+
+    @Configuration
+    static class TestConfig {
+
+        @Bean
+        Flyway flyway(DataSource dataSource) {
+            return Flyway.configure().dataSource(dataSource)
+                .cleanDisabled(false)
+                .locations("classpath:db/migration/allEnvs")
+                .load();
+        }
+    }
 }

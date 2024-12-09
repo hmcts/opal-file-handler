@@ -53,8 +53,10 @@ spring:
             # silence the 'wall-of-text' - unnecessary exception throw about blob types
             non_contextual_creation: true
   flyway:
+    locations: ${FLYWAY_LOCATIONS:classpath:db/migration}
     baseline-on-migrate: true
     enabled: true
+    ignoreMigrationPatterns: "*:missing"
 
 dbMigration:
   # When true, the app will run DB migration on startup.
