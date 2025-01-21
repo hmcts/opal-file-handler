@@ -154,7 +154,10 @@ def coverageExclusions = [
   '**/uk/gov/hmcts/reform/opal/model/**',
   '**/uk/gov/hmcts/reform/opal/config/**',
   '**/uk/gov/hmcts/reform/opal/exception/**',
-  '**/uk/gov/hmcts/reform/opal/repository/**'
+  '**/uk/gov/hmcts/reform/opal/repository/**',
+  '**/uk/gov/hmcts/reform/opal/Application.java',
+  '**/uk/gov/hmcts/reform/opal/scheduler/config/**',
+  '**/uk/gov/hmcts/reform/opal/scheduler/exception/**'
 ]
 
 jacocoTestReport {
