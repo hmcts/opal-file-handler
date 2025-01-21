@@ -5,7 +5,9 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.quartz.CronExpression;
 import org.quartz.CronScheduleBuilder;
+import org.quartz.CronTrigger;
 import org.quartz.Job;
 import org.quartz.JobBuilder;
 import org.quartz.JobDataMap;
@@ -15,8 +17,10 @@ import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.Trigger;
 import org.quartz.TriggerKey;
+import uk.gov.hmcts.reform.opal.scheduler.exception.JobException;
 import uk.gov.hmcts.reform.opal.scheduler.model.JobData;
 
+import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
@@ -26,6 +30,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.never;
@@ -173,6 +178,60 @@ class JobServiceTest {
         jobsService.clearJobs();
 
         verify(scheduler).clear();
+
+    }
+
+    @Test
+    void errorScheduleNewJob() throws SchedulerException {
+        //given
+        String jobId = UUID.randomUUID().toString();
+        String group = "Reminders";
+        JobData jobData = getJobData(jobId, group);
+
+        ZonedDateTime startDateTime = LocalDate.now().atStartOfDay(ZoneOffset.UTC);
+
+        when(scheduler.scheduleJob(any(JobDetail.class), any(Trigger.class)))
+            .thenThrow(SchedulerException.class);
+
+        assertThrows(JobException.class, () -> {
+            jobsService.scheduleJob(jobData, startDateTime);
+        });
+
+    }
+
+    @Test
+    void errorScheduleNewJobWithCron() throws SchedulerException, ParseException {
+        //given
+        String jobId = UUID.randomUUID().toString();
+        String group = "Reminders";
+        JobData jobData = getJobData(jobId, group);
+
+        CronExpression cronExpression = new CronExpression("0 * * * * ?");
+
+        when(scheduler.scheduleJob(any(JobDetail.class), any(CronTrigger.class)))
+            .thenThrow(SchedulerException.class);
+
+        assertThrows(JobException.class, () -> {
+            jobsService.scheduleJob(jobData, cronExpression.toString());
+        });
+
+    }
+
+    @Test
+    void errorRescheduleJob() throws SchedulerException {
+        //given
+        String jobId = UUID.randomUUID().toString();
+        String group = "Reminders";
+        JobData jobData = getJobData(jobId, group);
+
+        ZonedDateTime startDateTime = LocalDate.now().atStartOfDay(ZoneOffset.UTC);
+
+        when(scheduler.rescheduleJob(any(TriggerKey.class), any(Trigger.class)))
+            .thenThrow(SchedulerException.class);
+
+        assertThrows(JobException.class, () -> {
+            jobsService.rescheduleJob(jobData, startDateTime);
+        });
 
     }
 

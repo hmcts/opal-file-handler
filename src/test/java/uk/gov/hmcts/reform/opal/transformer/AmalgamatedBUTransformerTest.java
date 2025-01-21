@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-class AmalgamatedCTTransformerTest {
+class AmalgamatedBUTransformerTest {
 
     @Mock
     private AntCtAmalgamatedRepository antCtAmalgamated;
@@ -31,7 +31,7 @@ class AmalgamatedCTTransformerTest {
     private AntMccCtRepository antMccCtRepository;
 
     @InjectMocks
-    private AmalgamatedCTTransformer amalgamatedCTTransformer;
+    private AmalgamatedBUTransformer amalgamatedBUTransformer;
 
     @BeforeEach
     void setUp() {
@@ -57,7 +57,7 @@ class AmalgamatedCTTransformerTest {
         when(antCtAmalgamated.findByAmalgamatedCt("123456")).thenReturn(cashEntity);
         when(antMccCtRepository.findByBranchSortCodeAndBranchAccountNumber(any(), any())).thenReturn(antMccCtEntity);
 
-        OpalFile result = amalgamatedCTTransformer.transformAmalgamatedCT(file, "DB");
+        OpalFile result = amalgamatedBUTransformer.transformAmalgamatedCT(file, "DB");
 
         assertEquals("a121_123456_DB_678.dat", StandardBankingFileName.toString(
             (StandardBankingFileName) result.getNewFileName()));
@@ -78,7 +78,7 @@ class AmalgamatedCTTransformerTest {
 
         when(antMccCtRepository.findByBranchSortCodeAndBranchAccountNumber(any(), any())).thenReturn(antMccCtEntity);
 
-        OpalFile result = amalgamatedCTTransformer.transformAmalgamatedCT(file, "DB");
+        OpalFile result = amalgamatedBUTransformer.transformAmalgamatedCT(file, "DB");
 
         assertEquals("a121_123456_DB_678.dat", StandardBankingFileName.toString(
             (StandardBankingFileName) result.getNewFileName()));
@@ -89,7 +89,7 @@ class AmalgamatedCTTransformerTest {
         OpalFile file = OpalFile.builder().build();
         file.setFileContent(new DwpFile());
 
-        assertThrows(IllegalArgumentException.class, () -> amalgamatedCTTransformer
+        assertThrows(IllegalArgumentException.class, () -> amalgamatedBUTransformer
             .transformAmalgamatedCT(file, "DB"));
     }
 

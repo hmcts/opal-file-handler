@@ -16,9 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static uk.gov.hmcts.reform.opal.sftp.SftpLocation.DWP_BAILIFFS;
-import static uk.gov.hmcts.reform.opal.sftp.SftpLocation.DWP_BAILIFFS_ARCHIVE;
 import static uk.gov.hmcts.reform.opal.sftp.SftpLocation.DWP_BAILIFFS_PROCESSING;
-import static uk.gov.hmcts.reform.opal.sftp.SftpLocation.DWP_BAILIFFS_SUCCESS;
 
 @Slf4j
 @Service
@@ -84,25 +82,16 @@ public class FileHandlingService {
         return fileContentsBuilder.toString();
     }
 
-    public void outputFileSuccess(OpalFile file) {
-
-        //upload new file to success dir
+    public void uploadStandardBankingFile(OpalFile file, String newPath) {
         sftpInboundService.uploadFile(StandardBankingFile.toString((StandardBankingFile) file.getFileContent())
                                           .getBytes(
-                                          StandardCharsets.UTF_8), DWP_BAILIFFS_SUCCESS.getPath(),
+                                          StandardCharsets.UTF_8), newPath,
                                       StandardBankingFileName
                                           .toString((StandardBankingFileName) file.getNewFileName()));
-
-        //delete file from processing to archive
-        sftpInboundService.moveFile(DWP_BAILIFFS_PROCESSING.getPath(), file.getOriginalFileName(),
-                                    DWP_BAILIFFS_ARCHIVE.getPath());
     }
 
-    public void outputFileError(String fileName, String oldPath, String newPath) {
-
-        //move file to error dir
+    public void moveFile(String fileName, String oldPath, String newPath) {
         sftpInboundService.moveFile(oldPath, fileName, newPath);
-
     }
 
 }

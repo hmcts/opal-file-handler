@@ -12,9 +12,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import uk.gov.hmcts.reform.opal.service.AutoCashService;
+import uk.gov.hmcts.reform.opal.service.DwpBailiffsService;
 
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -22,14 +22,14 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
-@SpringBootTest(classes = AutoCashJob.class)
-class AutoCashJobTest {
+@SpringBootTest(classes = DwpBailiffsJob.class)
+class DwpBailiffsJobTest {
 
     @Autowired
-    private AutoCashJob autoCashJob;
+    private DwpBailiffsJob dwpBailiffsJob;
 
     @MockBean
-    private AutoCashService autoCashService;
+    private DwpBailiffsService dwpBailiffsService;
 
     @Mock
     private JobExecutionContext jobExecutionContext;
@@ -48,20 +48,25 @@ class AutoCashJobTest {
     }
 
     @Test
-    @SneakyThrows
-    void testExecuteCallsAutoCashService() {
-        autoCashJob.execute(jobExecutionContext);
+    void testDwpBailiffServiceInjection() {
+        assertNotNull(dwpBailiffsJob.getDwpBailiffsService());
+    }
 
-        verify(autoCashService, times(1)).process("test.txt");
+    @Test
+    @SneakyThrows
+    void testExecuteCallsDwpBailiffsService() {
+        dwpBailiffsJob.execute(jobExecutionContext);
+
+        verify(dwpBailiffsService, times(1)).process();
     }
 
     @Test
     @SneakyThrows
     void testExecuteHandlesException() {
-        doThrow(new RuntimeException("Test exception")).when(autoCashService).process(anyString());
+        doThrow(new RuntimeException("Test exception")).when(dwpBailiffsService).process();
 
-        autoCashJob.execute(jobExecutionContext);
+        dwpBailiffsJob.execute(jobExecutionContext);
 
-        verify(autoCashService, times(1)).process("test.txt");
+        verify(dwpBailiffsService, times(1)).process();
     }
 }

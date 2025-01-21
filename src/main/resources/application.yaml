@@ -101,7 +101,7 @@ opal:
       location: ${OPAL_SFTP_OUTBOUND_LOCATION:outbound}
       create-sub-locations: ${OPAL_SFTP_OUTBOUND_CREATE_SUB_LOCATIONS:true}
   schedule:
-    auto-check-job:
+    auto-cheque-job:
       cron: ${OPAL_AUTO_CHECK_JOB_CRON:0 0 0 * * ?}
       file-name: ${OPAL_AUTO_CHECK_JOB_FILE_NAME:test.txt}
     auto-cash-job:
@@ -109,7 +109,6 @@ opal:
       file-name: ${OPAL_AUTO_CASH_JOB_FILE_NAME:test.txt}
     dwp-bailiffs-job:
       cron: ${OPAL_DWP_BAILIFFS_JOB_CRON:0 0 0 * * ?}
-      file-name: ${OPAL_DWP_BAILIFFS_JOB_FILE_NAME:test.txt}
     all-pay-archive-job:
       cron: ${OPAL_ALL_PAY_ARCHIVE_JOB_CRON:0 0 0 * * ?}
       file-name: ${OPAL_ALL_PAY_ARCHIVE_JOB_FILE_NAME:test.txt}
