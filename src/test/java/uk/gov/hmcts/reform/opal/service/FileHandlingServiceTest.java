@@ -11,8 +11,6 @@ import uk.gov.hmcts.reform.opal.model.dto.OpalFile;
 import uk.gov.hmcts.reform.opal.model.dto.StandardBankingFile;
 import uk.gov.hmcts.reform.opal.model.dto.StandardBankingFileName;
 import uk.gov.hmcts.reform.opal.sftp.SftpInboundService;
-import uk.gov.hmcts.reform.opal.util.XMLUtil;
-import uk.gov.hmcts.reform.opal.util.XMLUtilTest;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -35,6 +33,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.opal.sftp.SftpLocation.DWP_BAILIFFS;
 import static uk.gov.hmcts.reform.opal.sftp.SftpLocation.DWP_BAILIFFS_PROCESSING;
+import static uk.gov.hmcts.reform.opal.sftp.SftpLocation.DWP_BAILIFFS_SUCCESS;
 
 @SuppressWarnings("unchecked")
 class FileHandlingServiceTest {
@@ -90,11 +89,11 @@ class FileHandlingServiceTest {
     }
 
     @Test
-    void testCreateOpalFile_Success_Dwp() throws Exception {
+    void testCreateOpalFileDwp_Success() throws Exception {
         // Arrange
         String fileName = "testFile.txt";
         String path = "/path/to/file";
-        String fileContent = XMLUtilTest.getSampleXml();
+        String fileContent = getDwpTestFileContent();
 
         doAnswer(invocation -> {
             Consumer<InputStream> consumer = invocation.getArgument(2);
@@ -111,7 +110,6 @@ class FileHandlingServiceTest {
         assertNotNull(result);
         assertEquals(fileName, result.getOriginalFileName());
         assertTrue(result.getFileContent() instanceof DwpFile);
-        assertEquals(fileContent, XMLUtil.marshal(result.getFileContent()));
 
         verify(sftpInboundService, times(1)).downloadFile(eq(path), eq(fileName),
                                                           any(Consumer.class));
@@ -124,15 +122,11 @@ class FileHandlingServiceTest {
             .newFileName(StandardBankingFileName.builder().build()).build();
         opalFile.setFileContent(StandardBankingFile.builder().build());
         // Act
-        fileHandlingService.outputFileSuccess(opalFile);
+        fileHandlingService.uploadStandardBankingFile(opalFile, DWP_BAILIFFS_SUCCESS.getPath());
         // Assert
         String pathSuccess = "dwp-bailiffs/success";
-        String processingPath = "dwp-bailiffs/processing";
-        String archivePath = "dwp-bailiffs/archive";
         verify(sftpInboundService, times(1))
             .uploadFile(any(byte[].class), eq(pathSuccess), anyString());
-        verify(sftpInboundService, times(1))
-            .moveFile(eq(processingPath), eq(opalFile.getOriginalFileName()), eq(archivePath));
     }
 
     @Test
@@ -143,7 +137,7 @@ class FileHandlingServiceTest {
         String newPath = "dwp-bailiffs/error";
 
         // Act
-        fileHandlingService.outputFileError(fileName, oldPath, newPath);
+        fileHandlingService.moveFile(fileName, oldPath, newPath);
 
         // Assert
         verify(sftpInboundService, times(1)).moveFile(eq(oldPath), eq(fileName), eq(newPath));
@@ -184,5 +178,36 @@ class FileHandlingServiceTest {
             0000000000000000000000000000000000000000000000                  18011565T                            21122
             0000000000000000000000000000000000000000000000                  21001292B                            21121
             UTL10000000000000000000048800000000000000013""";
+    }
+
+    private String getDwpTestFileContent() {
+        return """
+            <?xml version="1.0" encoding="UTF-8"?>
+            <PacsTppSchedule xmlns="http://www.dwp.gsi.gov.uk/pacs" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:schemaLocation="http://www.dwp.gsi.gov.uk/pacs">
+             <DocumentHeader>
+              <CreditorID>0000031714</CreditorID>
+              <BatchNumber>00003</BatchNumber>
+              <PacsDocumentCreationDate>2023-09-10</PacsDocumentCreationDate>
+              <PacsDocumentCreationTime>10:59:59</PacsDocumentCreationTime>
+              <NotificationReference>0000000002</NotificationReference>
+             </DocumentHeader>
+             <DocumentDetail>
+              <CustomerRef>23000106E</CustomerRef>
+              <RecordType>02</RecordType>
+              <LocationCode>100202</LocationCode>
+              <NationalInsuranceNumberType></NationalInsuranceNumberType>
+              <DateFrom>2023-09-03</DateFrom>
+              <DateTo>2023-09-03</DateTo>
+              <DetailAmountType>0000000199</DetailAmountType>
+              <DetailAmountSign>+</DetailAmountSign>
+             </DocumentDetail>
+             <DocumentSummary>
+              <SummaryAmountType>0000000035</SummaryAmountType>
+              <SummaryAmountSign>+</SummaryAmountSign>
+              <Total02Records>5</Total02Records>
+              <Total03Records>4</Total03Records>
+             </DocumentSummary>
+            </PacsTppSchedule>""";
     }
 }

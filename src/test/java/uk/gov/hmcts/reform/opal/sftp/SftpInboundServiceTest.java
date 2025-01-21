@@ -11,6 +11,7 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.function.Consumer;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
@@ -97,5 +98,30 @@ class SftpInboundServiceTest {
         sftpInboundService.createSftpLocations();
 
         verify(sftpService, never()).createDirectoryIfNotExists(any(), any());
+    }
+
+    @Test
+    void testMoveFile() {
+        String oldPath = "old/path";
+        String fileName = "test.txt";
+        String newPath = "new/path";
+
+        // No need to stub the method as it is void
+        sftpInboundService.moveFile(oldPath, fileName, newPath);
+
+        verify(sftpService).moveFile(inboundSessionFactory, oldPath, fileName, newPath);
+    }
+
+    @Test
+    void testListFiles() {
+        String directoryPath = "test/directory";
+        List<String> expectedFiles = List.of("file1.txt", "file2.txt");
+
+        when(sftpService.listFiles(inboundSessionFactory, directoryPath)).thenReturn(expectedFiles);
+
+        List<String> actualFiles = sftpInboundService.listFiles(directoryPath);
+
+        assertEquals(expectedFiles, actualFiles);
+        verify(sftpService).listFiles(inboundSessionFactory, directoryPath);
     }
 }

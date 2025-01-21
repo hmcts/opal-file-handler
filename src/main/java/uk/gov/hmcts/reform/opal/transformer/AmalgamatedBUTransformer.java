@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
-public class AmalgamatedCTTransformer {
+public class AmalgamatedBUTransformer {
 
     private final AntCtAmalgamatedRepository antCtAmalgamated;
     private final AntMccCtRepository antMccCtRepository;
