@@ -271,7 +271,7 @@ dependencies {
   testImplementation 'org.projectlombok:lombok:1.18.36'
   testAnnotationProcessor 'org.projectlombok:lombok:1.18.36'
 
-  testImplementation 'com.github.fge:json-schema-validator:2.2.14'
+  testImplementation 'com.networknt:json-schema-validator:1.5.6'
   testImplementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
 
   testImplementation 'org.springframework.boot:spring-boot-devtools'
