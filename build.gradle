@@ -240,7 +240,7 @@ dependencies {
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-integration'
   implementation group: 'org.springframework.integration', name: 'spring-integration-sftp'
   implementation group: 'org.springframework.integration', name: 'spring-integration-file'
-  implementation group: 'org.springdoc', name: 'springdoc-openapi-starter-webmvc-ui', version: '2.6.0'
+  implementation group: 'org.springdoc', name: 'springdoc-openapi-starter-webmvc-ui', version: '2.8.9'
 
   implementation group: 'com.github.hmcts.java-logging', name: 'logging', version: '6.1.9'
 
