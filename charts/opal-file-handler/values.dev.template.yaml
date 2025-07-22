@@ -19,3 +19,5 @@ java:
     OPAL_FILE_DB_PORT: 5432
     RUN_DB_MIGRATION_ON_STARTUP: true
     FLYWAY_LOCATIONS: classpath:db/migration/allEnvs
+    postgresql:
+      enabled: true
