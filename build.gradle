@@ -251,11 +251,11 @@ dependencies {
 
   implementation 'jakarta.xml.bind:jakarta.xml.bind-api:4.0.2'
 
-  compileOnly 'org.projectlombok:lombok:1.18.38'
-  annotationProcessor 'org.projectlombok:lombok:1.18.38'
+  compileOnly 'org.projectlombok:lombok:1.18.42'
+  annotationProcessor 'org.projectlombok:lombok:1.18.42'
 
-  testCompileOnly 'org.projectlombok:lombok:1.18.38'
-  testAnnotationProcessor 'org.projectlombok:lombok:1.18.38'
+  testCompileOnly 'org.projectlombok:lombok:1.18.42'
+  testAnnotationProcessor 'org.projectlombok:lombok:1.18.42'
 
   implementation 'org.postgresql:postgresql:42.7.10'
 
@@ -265,11 +265,11 @@ dependencies {
   implementation 'org.postgresql:postgresql'
   runtimeOnly 'org.flywaydb:flyway-database-postgresql:11.9.2'
 
-  implementation 'org.projectlombok:lombok:1.18.38'
-  annotationProcessor 'org.projectlombok:lombok:1.18.38'
+  implementation 'org.projectlombok:lombok:1.18.42'
+  annotationProcessor 'org.projectlombok:lombok:1.18.42'
 
-  testImplementation 'org.projectlombok:lombok:1.18.38'
-  testAnnotationProcessor 'org.projectlombok:lombok:1.18.38'
+  testImplementation 'org.projectlombok:lombok:1.18.42'
+  testAnnotationProcessor 'org.projectlombok:lombok:1.18.42'
 
   testImplementation 'com.networknt:json-schema-validator:1.5.9'
   testImplementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
