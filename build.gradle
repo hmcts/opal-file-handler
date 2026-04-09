@@ -255,7 +255,7 @@ dependencies {
   implementation group: 'ch.qos.logback', name: 'logback-classic', version: logbackVersion
   implementation group: 'ch.qos.logback', name: 'logback-core', version: logbackVersion
 
-  implementation 'jakarta.xml.bind:jakarta.xml.bind-api:4.0.2'
+  implementation 'jakarta.xml.bind:jakarta.xml.bind-api:4.0.5'
 
   compileOnly 'org.projectlombok:lombok:1.18.44'
   annotationProcessor 'org.projectlombok:lombok:1.18.44'
