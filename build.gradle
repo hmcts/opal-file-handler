@@ -230,6 +230,12 @@ ext {
 ext['snakeyaml.version'] = '2.0'
 ext['tomcat.version'] = '10.1.40'
 
+dependencyManagement {
+  imports {
+    mavenBom 'org.testcontainers:testcontainers-bom:1.21.4'
+  }
+}
+
 dependencies {
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web'
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-actuator'
@@ -274,6 +280,7 @@ dependencies {
   testImplementation 'com.networknt:json-schema-validator:1.5.9'
   testImplementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
 
+  testImplementation platform('org.testcontainers:testcontainers-bom:1.21.4')
   testImplementation 'org.springframework.boot:spring-boot-devtools'
   testImplementation 'org.springframework.boot:spring-boot-testcontainers'
   testImplementation 'org.testcontainers:junit-jupiter:1.21.4'
@@ -289,7 +296,9 @@ dependencies {
   testImplementation 'io.cucumber:cucumber-junit-platform-engine:7.23.0'
 }
 
-mainClassName = 'uk.gov.hmcts.reform.opal.Application'
+application {
+  mainClass = 'uk.gov.hmcts.reform.opal.Application'
+}
 
 bootJar {
   archiveFileName = "opal-file-handler.jar"
