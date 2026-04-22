@@ -250,7 +250,6 @@ dependencies {
   implementation 'org.springframework.boot:spring-boot-starter-actuator'
   implementation 'org.springframework.boot:spring-boot-starter-aspectj'
   implementation 'org.springframework.boot:spring-boot-flyway'
-  implementation 'org.springframework.boot:spring-boot-starter-json'
   implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
   implementation 'org.springframework.boot:spring-boot-starter-quartz'
   implementation 'org.springframework.boot:spring-boot-starter-integration'
@@ -275,20 +274,11 @@ dependencies {
 
   implementation 'org.postgresql:postgresql:42.7.10'
 
-  implementation 'io.rest-assured:rest-assured:5.5.7'
-
   implementation 'org.flywaydb:flyway-core:12.4.0'
-  implementation 'org.postgresql:postgresql'
   runtimeOnly 'org.flywaydb:flyway-database-postgresql:12.4.0'
 
-  implementation 'org.projectlombok:lombok:1.18.46'
-  annotationProcessor 'org.projectlombok:lombok:1.18.46'
-
-  testImplementation 'org.projectlombok:lombok:1.18.46'
-  testAnnotationProcessor 'org.projectlombok:lombok:1.18.46'
-
+  testImplementation 'io.rest-assured:rest-assured:5.5.7'
   testImplementation 'com.networknt:json-schema-validator:3.0.2'
-  testImplementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
 
   testImplementation platform('org.testcontainers:testcontainers-bom:2.0.5')
   testImplementation 'org.springframework.boot:spring-boot-devtools'
@@ -303,8 +293,6 @@ dependencies {
     exclude group: 'junit', module: 'junit'
     exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
   }
-  testImplementation 'org.junit.platform:junit-platform-suite:6.0.3'
-  testImplementation 'io.cucumber:cucumber-junit-platform-engine:7.23.0'
 }
 
 application {
