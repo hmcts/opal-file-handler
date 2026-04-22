@@ -241,7 +241,7 @@ ext['tomcat.version'] = '10.1.40'
 
 dependencyManagement {
   imports {
-    mavenBom 'org.testcontainers:testcontainers-bom:1.21.4'
+    mavenBom 'org.testcontainers:testcontainers-bom:2.0.5'
   }
 }
 
@@ -290,7 +290,7 @@ dependencies {
   testImplementation 'com.networknt:json-schema-validator:3.0.2'
   testImplementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
 
-  testImplementation platform('org.testcontainers:testcontainers-bom:1.21.4')
+  testImplementation platform('org.testcontainers:testcontainers-bom:2.0.5')
   testImplementation 'org.springframework.boot:spring-boot-devtools'
   testImplementation 'org.springframework.boot:spring-boot-testcontainers'
   testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
