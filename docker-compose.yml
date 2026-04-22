@@ -22,7 +22,7 @@ services:
         - http_proxy
         - https_proxy
         - no_proxy
-    image: hmctspublic.azurecr.io/opal/file-handler
+    image: hmctsprod.azurecr.io/opal/file-handler
     environment:
       # these environment variables are used by java-logging library
       - ROOT_APPENDER
