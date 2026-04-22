@@ -10,8 +10,8 @@ import org.quartz.JobDetail;
 import org.quartz.JobExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.reform.opal.service.DwpBailiffsService;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -28,7 +28,7 @@ class DwpBailiffsJobTest {
     @Autowired
     private DwpBailiffsJob dwpBailiffsJob;
 
-    @MockBean
+    @MockitoBean
     private DwpBailiffsService dwpBailiffsService;
 
     @Mock

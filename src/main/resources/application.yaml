@@ -25,9 +25,6 @@ spring:
     import: "optional:configtree:/mnt/secrets/opal/"
   application:
     name: Opal File Handler
-  jackson:
-    serialization:
-      write_dates_as_timestamps: false
   datasource:
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://${OPAL_FILE_DB_HOST:localhost}:${OPAL_FILE_DB_PORT:5434}/${OPAL_FILE_DB_NAME:opal-file-db}${OPAL_USER_DB_OPTIONS:}
