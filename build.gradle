@@ -277,7 +277,7 @@ dependencies {
   testImplementation 'org.projectlombok:lombok:1.18.44'
   testAnnotationProcessor 'org.projectlombok:lombok:1.18.44'
 
-  testImplementation 'com.networknt:json-schema-validator:3.0.1'
+  testImplementation 'com.networknt:json-schema-validator:3.0.2'
   testImplementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
 
   testImplementation platform('org.testcontainers:testcontainers-bom:1.21.4')
