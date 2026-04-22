@@ -3,7 +3,7 @@ package uk.gov.hmcts.reform.opal.sftp;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.integration.sftp.session.DefaultSftpSessionFactory;
 import uk.gov.hmcts.reform.opal.sftp.config.SftpConnection;
 
@@ -23,13 +23,13 @@ import static org.mockito.Mockito.when;
 class SftpInboundServiceTest {
 
     // Mocks
-    @MockBean
+    @MockitoBean
     DefaultSftpSessionFactory inboundSessionFactory;
 
-    @MockBean
+    @MockitoBean
     SftpService sftpService;
 
-    @MockBean
+    @MockitoBean
     SftpConnection inboundConnection;
 
     @Autowired

@@ -1,5 +1,8 @@
 .gradle
 /build/
+/target/
+/functional-test-report/
+/smoke-test-report/
 !gradle/wrapper/gradle-wrapper.jar
 *.class
 bin/main/application.yaml
