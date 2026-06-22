@@ -1,9 +1,0 @@
-#!groovy
-
-@Library("Infrastructure")
-
-def type = "java"
-def product = "opal"
-def component = "file-handler"
-
-withPipeline(type, product, component) {}
